@@ -10,7 +10,7 @@
         <label for="inputEmail" class="sr-only" >uname</label>
         <input type="" id="inputUname" class="form-control" placeholder="uname" required="" autofocus="" v-model="uname" name="uname">
         <label for="inputEmail" class="sr-only" >Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" v-model="email" name="email">
+        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" v-model="email" name="email" @input="verifyEmail"><span style="background: red;">{{ emailWarn }}</span>
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" v-model="upwd" name="upwd">
         <label for="inputPassword" class="sr-only">confirm Password</label>
@@ -20,8 +20,8 @@
             <input type="checkbox" value="remember-me"> I'm not robot
           </label>
         </div>
-        <button class="btn btn-lg btn-primary btn-block"  @click="recaptcha">Sign up</button>
-        <div id="divspan"><span>已經是會員了嗎?<a href="">登入</a></span></div>
+        <button :class="btnClass"  @click="recaptcha">Sign up</button>
+        <div id="divspan"><span>已經是會員了嗎?<router-link to="/signin">登入</router-link></span></div>
         <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
       </div>
     </div>
@@ -37,12 +37,35 @@
         upwd: '',
         cfupwd: '',
         token: '',
+        emailWarn: '',
+        upwdWarn: '',
+        emailReg: false,
+        upwdReg: false,
+        btnClass: {
+          btn: true,
+          "btn-lg": true,
+          "btn-block": true,
+          "btn-primary": true,
+          disabled: false
+        }
       }
     },
     components: {
       'topBar': topBar,
     },
     methods: {
+      verifyEmail() {
+        let emailRule = /^\w+((-\w+)|(.\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z]+$/;
+        if (this.email.search(emailRule) !== -1 ) {
+          this.emailReg = true;
+          this.emailWarn = '電郵地址格式正確';
+        }else {
+          this.emailWarn = '電郵地址格式錯誤';
+        }
+      },
+      verifyPwd() {
+        // let upwdRule = /^$/;
+      },
       // google 機器人驗證 recaptcha v.3 for vue 2.
       recaptcha() {
         console.log("recaptcha clicked");
@@ -58,7 +81,7 @@
                 console.log(res);
                 let code = res.data.code;
                 if (code == 1) {
-                  this.$router.push('/login');
+                  this.$router.push('/signup');
                 }
               })
             });

@@ -2,9 +2,6 @@
   <div>
 
     <div class="container bootstrap snippets bootdey">
-      <div>
-        <top-bar></top-bar>
-      </div>
       <h1 class="text-primary"><span class="glyphicon glyphicon-user"></span>Edit Profile</h1>
         <hr>
     <div class="row">
@@ -62,10 +59,8 @@
   </div>
 </template>
 <script>
-  import topBar from '../bar/topBar.vue'
   export default {
     components: {
-      'topBar': topBar,
     }
   }
 </script>

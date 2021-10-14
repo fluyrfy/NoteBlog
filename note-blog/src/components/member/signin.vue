@@ -1,23 +1,20 @@
 <template>
   <div class="container">
-    <div>
-      <top-bar></top-bar>
-    </div>
     <div class="text-center">
       <form class="form-signin">
         <img class="mb-4" src="bootstrap-solid.svg" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="">
+        <label for="inputEmail" class="sr-only" >Email address</label>
+        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" v-model="email">
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="">
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" v-model="upwd">
         <a href="" id="a1">忘記密碼?</a>
         <div class="checkbox mb-3">
           <label>
             <input type="checkbox" value="remember-me"> Remember me
           </label>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" @click="signin">Sign in</button>
         <div id="divspan"><span>還沒有帳號嗎?<a href="">註冊</a></span></div>
         <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
       </form>
@@ -25,13 +22,29 @@
   </div>
 </template>
 <script>
-  import topBar from '../bar/topBar.vue'
   export default {
+    data() {
+      return {
+        email: '',
+        upwd: '',
+      }
+    },
     components: {
-      'topBar': topBar,
     },
     methods: {
-
+      signin() {
+        let e = this.email;
+        let p = this.upwd;
+        let url = 'signin';
+        let obj = { email: e, upwd: p }
+        this.axios.get(url, {params:obj}).then(res => {
+          console.log(res.data);
+          let code = res.data.code;
+          if (code == 1) {
+            this.$router.push('/');
+          }
+        })
+      }
     },
   }
 </script>
