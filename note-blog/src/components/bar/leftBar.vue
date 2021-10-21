@@ -6,6 +6,7 @@
         <span class="fs-4">主題{{ $store.getters.getTopic }}</span>
       </a>
       <hr>
+      <router-link to="/">
       <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
           <a href="#" class="nav-link active" aria-current="page">
@@ -23,6 +24,7 @@
           </svg>
         </li>
       </ul>
+    </router-link>
       <hr>
     </div>
   </div>

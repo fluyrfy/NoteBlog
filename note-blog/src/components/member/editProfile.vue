@@ -2,18 +2,7 @@
   <div>
 
     <div class="container bootstrap snippets bootdey">
-      <h1 class="text-primary"><span class="glyphicon glyphicon-user"></span>Edit Profile</h1>
-        <hr>
-    <div class="row">
-        <!-- left column -->
-        <div class="col-md-3">
-          <div class="text-center">
-            <img src="//placehold.it/100" class="avatar img-circle" alt="avatar">
-            <h6>Upload a different photo...</h6>
-
-            <input type="file" class="form-control">
-          </div>
-        </div>
+    <div class="row container">
 
         <!-- edit form column -->
         <div class="col-md-9 personal-info">
@@ -24,33 +13,33 @@
           </div>
           <h3>Personal info</h3>
 
-          <form class="form-horizontal" role="form">
+          <div class="form-horizontal" role="form">
             <div class="form-group">
-              <label class="col-lg-3 control-label">暱稱:</label>
+              <label class="col-lg-3 control-label" >暱稱:</label>
               <div class="col-lg-8">
-                <input class="form-control" type="text" placeholder="新暱稱">
+                <input class="form-control" type="text" placeholder="新暱稱" v-model="uname">
               </div>
             </div>
             <div class="form-group">
-              <label class="col-lg-3 control-label">密碼:</label>
+              <label class="col-lg-3 control-label">新密碼:</label>
               <div class="col-lg-8">
-                <input class="form-control" type="text" placeholder="新密碼">
+                <input class="form-control" type="password" placeholder="新密碼" v-model="upwd">
               </div>
             </div>
             <div class="form-group">
-              <label class="col-lg-3 control-label">確認密碼:</label>
+              <label class="col-lg-3 control-label">確認新密碼:</label>
               <div class="col-lg-8">
-                <input class="form-control" type="text" placeholder="確認新密碼">
+                <input class="form-control" type="password" placeholder="確認新密碼" v-model="cfupwd">
               </div>
             </div>
             <div class="form-group">
               <label class="col-lg-3 control-label">個人簡介:</label>
               <div class="col-lg-8">
-                <input class="form-control" type="text">
+                <input class="form-control" type="text" v-model="selfIntro" placeholder="留下你的自我介紹">
               </div>
             </div>
-
-          </form>
+            <button type="" @click="updateUser" class="btn btn-primary">修改</button>
+          </div>
         </div>
     </div>
     <hr>
@@ -60,8 +49,42 @@
 </template>
 <script>
   export default {
+    inject: ['dataReload'],
+    data() {
+      return {
+        uname: '',
+        upwd: '',
+        cfupwd: '',
+        selfIntro: '',
+      }
+    },
     components: {
-    }
+    },
+    methods: {
+      updateUser() {
+        let u = this.uname;
+        let p = this.upwd;
+        let cfp = this.cfupwd;
+        let s = this.selfIntro;
+        let url = 'updateUser'
+        let obj = { uname: u, upwd: p, selfIntro: s }
+        console.log(obj)
+        if (p == cfp) {
+          this.axios.post(url, (obj)).then(res => {
+            console.log(res)
+            let code = res.data.code;
+            if (code == 1) {
+              this.uname = '';
+              this.upwd = '',
+              this.cfupwd = '',
+              this.selfIntro = '',
+              this.dataReload();
+            }
+          })
+        }
+
+      }
+    },
   }
 </script>
 <style>

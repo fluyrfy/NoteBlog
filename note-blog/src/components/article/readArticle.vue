@@ -30,42 +30,49 @@
               <!-- Comments section-->
               <section class="mb-5">
                   <div class="card bg-light">
-                      <div class="card-body">
+                      <div class="card-body" v-if="isRouterAlive">
                           <!-- Comment form-->
-                          <form class="mb-4"><textarea class="form-control" rows="3" placeholder="Join the discussion and leave a comment!"></textarea></form>
+                          <div class="mb-4"><textarea class="form-control" rows="3" placeholder="Join the discussion and leave a comment!" v-model="comment"></textarea><button type="" class="btn btn-primary" @click="addComment">留言</button></div>
                           <!-- Comment with nested comments-->
-                          <div class="d-flex mb-4">
+                          <div v-for="(item1, index1) of aInfo" :key="index1">
+                            <div v-if="item1.parentcmtid == 0" class="d-flex mb-4" >
                               <!-- Parent comment-->
-                              <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                              <div class="ms-3">
-                                  <div class="fw-bold">Commenter Name</div>
-                                  If you're going to lead a space frontier, it has to be government; it'll never be private enterprise. Because the space frontier is dangerous, and it's expensive, and it has unquantified risks.
+                              <div class="flex-shrink-0"><img width="50px" height="50px" class="rounded-circle" :src="axios.defaults.baseURL+'/img/avatar/'+item1.cmtavatar" alt="..." /></div>
+                              <div class="ms-3" >
+                                  <div class="fw-bold">{{item1.cmtuname}}</div>
+                                  {{item1.cmtcontent}}
+                                  <a @click="show=item1.commentid" href="javascript:void(0)" class="text-muted">回覆</a>
+                                  <div class="mb-4" v-if="show==item1.commentid"><textarea class="form-control" rows="3" placeholder="請友善回覆" v-model="childComment"></textarea><button type="" class="btn btn-primary" @click="addChildComment(item1.commentid)">留言</button></div>
                                   <!-- Child comment 1-->
-                                  <div class="d-flex mt-4">
-                                      <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
+                                  <div v-for="(item2, index2) of aInfo" :key="index2">
+                                    <div v-if="item2.parentcmtid == item1.commentid" class="d-flex mt-4" >
+                                      <div class="flex-shrink-0"><img width="50px" height="50px" class="rounded-circle" :src="axios.defaults.baseURL+'/img/avatar/'+item2.cmtavatar" alt="..." /></div>
                                       <div class="ms-3">
-                                          <div class="fw-bold">Commenter Name</div>
-                                          And under those conditions, you cannot establish a capital-market evaluation of that enterprise. You can't get investors.
+                                          <div class="fw-bold">{{item2.cmtuname}}</div>
+                                          {{item2.cmtcontent}}
                                       </div>
+                                    </div>
+
                                   </div>
-                                  <!-- Child comment 2-->
+                                  <!-- Child comment 2
                                   <div class="d-flex mt-4">
                                       <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
                                       <div class="ms-3">
                                           <div class="fw-bold">Commenter Name</div>
                                           When you put money directly to a problem, it makes a good headline.
                                       </div>
-                                  </div>
+                                  </div> -->
                               </div>
+                            </div>
                           </div>
                           <!-- Single comment-->
-                          <div class="d-flex">
+                          <!-- <div class="d-flex">
                               <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
                               <div class="ms-3">
                                   <div class="fw-bold">Commenter Name</div>
                                   When I look at the universe and all the ways the universe wants to kill us, I find it hard to reconcile that with statements of beneficence.
                               </div>
-                          </div>
+                          </div> -->
                       </div>
                   </div>
               </section>
@@ -78,18 +85,27 @@
 </template>
 <script>
   export default {
+    inject: ['reload'],
     data() {
       return {
         aInfo: [],
         title: '',
         content: '',
         ctime: '',
+        comment: '',
+        childComment: '',
+        show: 0,
+        isRouterAlive: true
       }
     },
     props: ['aid'],
     mounted() {
       this.loadMore();
-      this.viewCount();
+    },
+    watch: {
+      show() {
+        this.childComment = "";
+      }
     },
     methods: {
       loadMore() {
@@ -98,11 +114,16 @@
         let url = 'read';
         this.axios.get(url, { params: obj } ).then((res) => {
           console.log(res);
-          this.aInfo = res.data;
+          this.aInfo = res.data.sort((a, b) => {
+            return b.commentid - a.commentid;
+          });
           this.title = this.aInfo[0].title;
           this.content = this.aInfo[0].content;
           this.ctime = this.aInfo[0].ctime;
         })
+        this.$store.commit("updateTopic", 0);
+        console.log('點進文章後監聽到變動', this.$store.getters.getTopic);
+        this.viewCount();
       },
       viewCount() {
         let aid = this.aid;
@@ -110,6 +131,43 @@
         let url = 'viewCount';
         this.axios.get(url, { params: obj } ).then((res) => {
           console.log(res)
+        })
+      },
+      addComment() {
+        let aid = this.aid;
+        let content = this.comment;
+        let obj = { aid: aid, content: content };
+        let url = 'addComment';
+        this.axios.post(url, obj).then(res => {
+          let code = res.data.code;
+          if (code == 0) {
+            this.$router.push('/signin')
+          } else if (code == 1) {
+              this.comment = '';
+              this.reloadComment();
+          }
+        })
+
+
+      },
+      addChildComment(commentid) {
+        let obj = { aid: this.aid, childComment: this.childComment, parentcmtid: commentid };
+        let url = 'addChildComment'
+        this.axios.post(url, obj).then(res => {
+          console.log(res);
+          let code = res.data.code;
+          if (code == 1) {
+            this.reloadComment();
+          }
+        })
+        this.show = 0;
+
+      },
+      reloadComment() {
+        this.isRouterAlive = false;
+        this.loadMore();
+        this.$nextTick(function() {
+          this.isRouterAlive = true;
         })
       }
     },

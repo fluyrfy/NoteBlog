@@ -37,27 +37,29 @@
     components: {
     },
     mounted() {
-      // let url = 'write'
-      // this.$axios.get(url).then((res) => {
-      //   let code = res.data.code;
-      //   if (code == -1) {
-      //     this.$router.push('/signin');
-      //     return;
-      //   }
-      // })
-      const editor = new Editor("#wangeditor")
-      // editor.customConfig.onchange = (html) => {
-      //   this.bulletconcent = html;
-      // }
-      // editor.config.height = 500
-      editor.create()
-      editor.config.onchange = (text) => {
-        console.log(text);
-        this.content = text;
-      }
-      // $text1.val(editor.txt.html())
+      this.loadMore();
     },
     methods: {
+      loadMore() {
+        let url = 'auth';
+        this.axios.get(url).then((res) => {
+          let code = res.data.code;
+          if (code == 0) {
+            this.$router.push('/signin');
+            return;
+          }
+        })
+        const editor = new Editor("#wangeditor")
+        // editor.customConfig.onchange = (html) => {
+        //   this.bulletconcent = html;
+        // }
+        // editor.config.height = 500
+        editor.create()
+        editor.config.onchange = (text) => {
+          console.log(text);
+          this.content = text;
+        }
+      },
       postArticle() {
         let t = this.topic;
         let cg = this.category;

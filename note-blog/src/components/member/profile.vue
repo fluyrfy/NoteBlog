@@ -6,14 +6,15 @@
       <div class="container flex-grow-1 container-p-y">
 
         <!-- Header -->
-        <div class="container-m-nx container-m-ny theme-bg-white mb-4">
+        <div class="container-m-nx container-m-ny theme-bg-white mb-4" >
           <div class="media col-md-10 col-lg-8 col-xl-7 py-5 mx-auto">
-            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="d-block ui-w-100 rounded-circle">
-            <div class="media-body ml-5">
-              <h4 class="font-weight-bold mb-4">{{ userInfo[0].uname }}</h4>
+            <img :src="src" alt="" class="rounded-circle img-thumbnail" width="110px" height="110px" v-if="isAlive">
+            <div class="media-body ml-5" >
+              <h4 class="font-weight-bold mb-4">{{ userInfo.uname }}</h4>
 
               <div class="text-muted mb-4">
                 Lorem ipsum dolor sit amet, nibh suavitate qualisque ut nam. Ad harum primis electram duo, porro principes ei has.
+                {{ userInfo.selfintro }}
               </div>
 
               <a href="javascript:void(0)" class="d-inline-block text-body">
@@ -33,11 +34,15 @@
             <a :class="tab1"  href="#/profile/ctrlArticle" @click="changeLeft">管理文章</a>
           </li>
           <li class="nav-item">
-            <a :class="tab2" href="#/profile/editProfile" @click="changeRight">修改資料</a>
+            <a :class="tab2" href="#/profile/editProfile" @click="changeMiddle">修改資料</a>
+          </li>
+          <li class="nav-item">
+            <a :class="tab3" href="#/profile/profilePhoto" @click="changeRight">新增頭像</a>
           </li>
         </ul>
-        <ctrl-article v-if="isActive"></ctrl-article>
-        <edit-profile v-else></edit-profile>
+        <article-list v-if="isActive == 1"></article-list>
+        <edit-profile v-else-if="isActive == 2"></edit-profile>
+        <profile-photo v-else></profile-photo>
         <!-- Header -->
             <!-- / Info -->
 
@@ -349,13 +354,15 @@
   </div>
 </template>
 <script>
-  import Ctrlarticle from './ctrlArticle.vue'
+  import Articlelist from '../article/articleList.vue'
   import Editprofile from './editProfile.vue'
+  import Profilephoto from './profilePhoto.vue'
   export default {
     data() {
       return {
         userInfo: [],
-        isActive: true,
+        src:"",
+        isActive: 1,
         tab1: {
           'nav-link': true,
           'active': true,
@@ -364,11 +371,23 @@
           'nav-link': true,
           'active': false,
         },
+        tab3: {
+          'nav-link': true,
+          'active': false,
+        },
+        uid: 0,
+        isAlive: true,
+      }
+    },
+    provide () {
+      return {
+        dataReload: this.dataReload,
       }
     },
     components: {
-      "ctrlArticle": Ctrlarticle,
+      "articleList": Articlelist,
       "editProfile": Editprofile,
+      "profilePhoto": Profilephoto,
     },
     mounted() {
       this.loadMore();
@@ -378,26 +397,56 @@
         let url = 'queryUser'
         this.axios.get(url).then((res) => {
           let code = res.data.code;
+          console.log(res)
           if (code == -1) {
             this.$router.push('/signin')
             return;
           }else if (code == -2) {
             console.log('查詢錯誤')
           }else {
-            this.userInfo = res.data;
+            this.userInfo = res.data[0];
+            console.log(this.userInfo)
+            this.$store.commit("updateUid", this.userInfo.uid)
+            if (this.userInfo.avatar == null) {
+              this.src = "./img/defaultUser.png"
+            } else {
+              this.src = `http://127.0.0.1:520/img/avatar/${this.userInfo.avatar}`
+            }
           }
         })
       },
       changeLeft() {
-        this.isActive = true;
+        this.isActive = 1;
         this.tab1.active = true;
         this.tab2.active = false;
+        this.tab3.active = false;
       },
-      changeRight() {
-        this.isActive = false;
+      changeMiddle() {
+        this.isActive = 2;
         this.tab1.active = false;
         this.tab2.active = true;
-      }
+        this.tab3.active = false;
+      },
+      changeRight() {
+        this.isActive = 3;
+        this.tab1.active = false;
+        this.tab2.active = false;
+        this.tab3.active = true;
+      },
+      dataReload() {
+        this.isAlive = false;
+        this.loadMore();
+        this.$nextTick(function() {
+          this.isAlive = true;
+        })
+      },
+      // dataReload() {
+      //   this.loadMore();
+      //   this.isDataAlive = false;
+      //   this.$nextTick(function() {
+      //     this.isDataAlive = true;
+      //   })
+      // }
     },
   }
 </script>

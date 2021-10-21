@@ -8,6 +8,46 @@ const qs = require('querystring');
 // const request = require('request'); npm官方已禁用= =
 const axios = require('axios');
 
+// uuid
+const { v4: uuidv4 } = require('uuid');
+
+// 圖片處理用到的
+const fileupload = require('express-fileupload');
+
+// const multer = require('multer');
+// const ejs = require('ejs');
+// const path = require('path');
+// // 設置儲存引擎
+// const storage = multer.diskStorage({
+//   destination: './public/img/user',
+//   filename: function (req, file, cb) {
+//     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+//   }
+// });
+// // 初始化上傳
+// const upload = multer({
+//   storage: storage,
+//   limits: { fileSize: 1000000 },
+//   fileFilter: function(req, file, cb){
+//     checkFileType(file, cb);
+//   }
+// }).single('myImage');
+// // 確認檔案類型
+// function checkFileType(file, cb){
+//   // Allowed ext
+//   const filetypes = /jpeg|jpg|png|gif/;
+//   // Check ext
+//   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+//   // Check mime
+//   const mimetype = filetypes.test(file.mimetype);
+
+//   if(mimetype && extname){
+//     return cb(null,true);
+//   } else {
+//     cb('Error: Images Only!');
+//   }
+// }
+
 // 創建數據庫連接池
 const pool=mysql.createPool({
   host:"127.0.0.1",
@@ -46,6 +86,9 @@ server.use(express.static("public"));
 // 使用內建bodyparser(註冊body-parser用法被淘汰)
 // server.use(express.urlencoded({ extended: false }));
 // server.use(express.json());
+
+// express 檔案上傳套件
+server.use(fileupload());
 
 //------------------------------------------------------用戶相關------------------------------------------------------
 // 用戶註冊
@@ -194,14 +237,107 @@ server.get('/queryUser', (req, res) => {
   }
 })
 
+// 修改用戶資料
+server.post('/updateUser', (req, res) => {
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+  }
+  req.on('data', data => {
+    data = JSON.parse(data.toString());
+    console.log(uid)
+    console.log(data)
+    let uname = data.uname;
+    let upwd = data.upwd;
+    let selfIntro = data.selfIntro;
+    let params = [];
+    let sql = 'UPDATE user SET ';
+    if (uname == null && upwd == null && selfIntro == null) {
+      return;
+    }
+    if (uname !== '' && upwd !== '' || uname !== '' && selfIntro !== '') {
+        sql += `uname = ?, `;
+        params.push(uname);
+      }else if (uname !== '') {
+        sql += `uname = ? `;
+        params.push(uname);
+      }
+    if (upwd !== '' && selfIntro !== '') {
+      sql += `upwd = md5(?), `;
+      params.push(upwd);
+    } else if (upwd !== '') {
+      sql += `upwd = md5(?) `;
+      params.push(upwd);
+    }
+    if (selfIntro !== '') {
+      sql += `selfintro = ? `;
+      params.push(selfIntro);
+    }
+    sql += `WHERE uid = ?`
+    params.push(uid);
+    console.log(sql, params)
+    pool.query(sql, params, (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.send( { code: 1, msg: '資料修改成功' } );
+      }else {
+        res.send( { code: -1, msg: '資料修改失敗' } );
+      }
+    })
+  })
+})
+
+// 登入驗證
+server.get('/auth', (req, res) => {
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+  }
+})
+
+// 大頭貼
+server.post('/avatar', (req, res) => {
+  let uid = req.session.uid;
+  if (req.files) {
+    console.log(req.files);
+    let file = req.files.file;
+    let  getFileExtension = function (filename) {
+      return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
+    }
+    let extension = getFileExtension(file.name);
+    if (extension !== undefined) {
+      let filename = `${uuidv4()}.${extension}`;
+      file.mv(`./public/img/avatar/${ filename }`, (err) => {
+        if (err) throw err;
+        console.log('圖片上傳成功');
+      })
+      let sql = `UPDATE user SET avatar = ? WHERE uid = ?`;
+        pool.query(sql, [filename, uid], (err, result) => {
+          if (err) throw err;
+          if (result.affectedRows > 0) {
+            res.send( { code: 1, msg: '圖片上傳成功' } );
+          }else {
+            res.send( { code: -1, msg: '圖片上傳失敗' } );
+          }
+        })
+    }
+  } else {
+    console.log('無資料');
+  }
+})
+
 //------------------------------------------------------文章相關------------------------------------------------------
 // 新增文章
 server.get('/write', (req, res) => {
   console.log(req.session.uid);
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '請先登入' } );
+    return;
+  }
   let t = req.query.topic;
   let cg = req.query.category;
   let ct = req.query.content;
-  let uid = req.session.uid;
   let sql = `INSERT INTO article (cid, title, content, uid) VALUES (?, ?, ?, ?)`;
   pool.query(sql, [cg, t, ct, uid], (err, result) => {
     if (err) throw err;
@@ -220,14 +356,24 @@ server.get('/edit', (req, res) => {
 
 // 刪除文章
 server.get('/delete', (req, res) => {
-
+  let aid = req.query.aid;
+  console.log(aid)
+  let sql = `UPDATE article SET status = -1 WHERE aid = ?`
+  pool.query(sql, [aid], (err, result) => {
+    if (err) throw err;
+    if (result.affectedRows > 0) {
+      res.send( { code: 1, msg: '文章刪除成功' } );
+    }else {
+      res.send( { code: -1, msg: '文章刪除失敗' } );
+    }
+  })
 })
 
 // 概覽文章
 server.get('/list', (req, res) => {
   let t = req.query.topic;
   if (t == 0) {
-    let sql = `SELECT * FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid`;
+    let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.status <> -1`;
     pool.query(sql, (err, result) => {
       if (err) throw err;
       if (result.length == 0) {
@@ -237,7 +383,7 @@ server.get('/list', (req, res) => {
       }
     })
   }else {
-    let sql = `SELECT * FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.cid = ?`;
+    let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.cid = ? AND a.status <> -1`;
     pool.query(sql, [t], (err, result) => {
       if (err) {
         throw err;
@@ -250,11 +396,26 @@ server.get('/list', (req, res) => {
   }
 })
 
+// 查詢個人文章列表
+server.get('/listUser', (req, res) => {
+  let u = req.query.uid;
+  let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.uid = ? AND a.status <> -1`
+  pool.query(sql, [u], (err, result) => {
+    if (err) {
+      throw err;
+    }if (result.length == 0) {
+      res.send( { code: -1, msg: '目前暫無文章' })
+    }else {
+      res.send( { code: 1, msg: '查詢到文章', data: result } );
+    }
+  })
+})
+
 // 指定閱覽文章
 server.get('/read', (req, res) => {
   let aid = req.query.aid;
   console.log(aid);
-  let sql = `SELECT * FROM article WHERE aid = ?`
+  let sql = `SELECT a.*, b.commentid, b.uid AS cmtuid, b.cmtuname, b.cmtavatar, b.content AS cmtcontent, b.parentcmtid, b.ctime AS cmttime FROM article AS a LEFT JOIN (SELECT a.*, b.uname AS cmtuname, b.avatar AS cmtavatar FROM comments AS a LEFT JOIN user AS b ON a.uid = b.uid) AS b ON a.aid = b.aid WHERE a.aid = ?;`
   pool.query(sql, [aid], (err, result) => {
     if (err) throw err;
     if (result.length == 0) {
@@ -265,7 +426,7 @@ server.get('/read', (req, res) => {
   })
 })
 
-// 文章瀏覽次數
+// 文章瀏覽次數查詢
 server.get('/viewTime', (req,res) => {
   console.log('查詢瀏覽次數!!')
   let aid = req.query.aid;
@@ -300,6 +461,54 @@ server.get('/viewCount', (req, res) => {
     })
   }
 })
+
+// 新增留言
+server.post('/addComment', (req, res) => {
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+    return;
+  }
+  req.on('data', data => {
+    data = JSON.parse(data.toString());
+    let aid = data.aid;
+    let content = data.content;
+    let sql = `INSERT INTO comments (uid, aid, content) VALUES (?, ?, ?)`;
+    pool.query(sql, [uid, aid, content], (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.send( { code: 1, msg: '留言新增成功' } );
+      }else {
+        res.send( { code: -1, msg: '留言新增失敗' } );
+      }
+    })
+  })
+})
+
+// 新增子留言
+server.post('/addChildComment', (req, res) => {
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+    return;
+  }
+  req.on('data', data => {
+    data = JSON.parse(data.toString());
+    let aid = data.aid;
+    let childComment = data.childComment;
+    let parentcmtid = data.parentcmtid;
+    let sql = `INSERT INTO comments (uid, aid, content, parentcmtid) VALUES (?, ?, ?, ?)`
+    pool.query(sql, [uid, aid, childComment, parentcmtid], (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.send( { code: 1, msg: '子留言新增成功' } );
+      }else {
+        res.send( { code: -1, msg: '子留言新增失敗' } );
+      }
+    })
+  })
+})
+
 
 //------------------------------------------------------收藏相關------------------------------------------------------
 // 收藏作者

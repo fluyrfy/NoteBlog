@@ -1,8 +1,5 @@
 <template>
   <div class="container">
-    <div>
-      <top-bar></top-bar>
-    </div>
     <div class="text-center">
       <div class="form-signin">
         <img class="mb-4" src="bootstrap-solid.svg" alt="" width="72" height="72">
@@ -28,7 +25,6 @@
   </div>
 </template>
 <script>
-  import topBar from '../bar/topBar.vue'
   export default {
     data() {
       return {
@@ -51,7 +47,6 @@
       }
     },
     components: {
-      'topBar': topBar,
     },
     methods: {
       verifyEmail() {
@@ -81,7 +76,7 @@
                 console.log(res);
                 let code = res.data.code;
                 if (code == 1) {
-                  this.$router.push('/signup');
+                  this.$router.push('/signin');
                 }
               })
             });

@@ -16,6 +16,12 @@
     },
     components: {
       'articleList': articleList,
+    },
+    mounted() {
+      this.$store.commit("updateUid", 0)
+    },
+    beforeDestroy() {
+      this.$store.commit("updateTopic", 0);
     }
   }
 </script>

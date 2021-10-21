@@ -15,7 +15,7 @@
           </label>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit" @click="signin">Sign in</button>
-        <div id="divspan"><span>還沒有帳號嗎?<a href="">註冊</a></span></div>
+        <div id="divspan"><span>還沒有帳號嗎?<router-link to="/signup">註冊</router-link></span></div>
         <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
       </form>
     </div>

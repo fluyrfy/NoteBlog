@@ -4,6 +4,11 @@ import router from './router'//引入router
 import { VueReCaptcha } from 'vue-recaptcha-v3'
 import Vuex from 'vuex'
 
+
+// Cropper
+import VueCropper from 'vue-cropper'
+Vue.use(VueCropper);
+
 //引入axios套件
 import axios from 'axios'
 //配置請求時保存session信息
@@ -28,15 +33,22 @@ Vue.use(Vuex);
 let store = new Vuex.Store({
   state: { //集中管理數據屬性
     topic: 0,
+    uid: 0,
   },
   mutations: {
     updateTopic(state, topic) {
       state.topic = topic;
-    }
+    },
+    updateUid(state, uid) {
+      state.uid = uid;
+    },
   },
   getters: {  //集中獲取數據函數
     getTopic(state) {
       return state.topic;
+    },
+    getUid(state) {
+      return state.uid;
     }
   }
 })
