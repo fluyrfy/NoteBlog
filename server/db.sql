@@ -18,6 +18,7 @@ CREATE TABLE article(
   cid TINYINT NOT NULL,
   title VARCHAR(40) NOT NULL,
   content TEXT NOT NULL,
+  img VARCHAR(50),
   uid INT NOT NULL,
   ctime TIMESTAMP NOT NULL DEFAULT current_timestamp,
   getLikes INT NOT NULL DEFAULT 0,
@@ -40,4 +41,17 @@ CREATE TABLE comments(
   content TEXT NOT NULL,
   parentcmtid INT NOT NULL DEFAULT 0,
   ctime TIMESTAMP NOT NULL DEFAULT current_timestamp
+);
+
+-- 主題表
+CREATE TABLE category(
+  cid TINYINT PRIMARY KEY NOT NULL,
+  cname VARCHAR(50) NOT NULL
+);
+
+-- 收藏文章表
+CREATE TABLE likeArticle(
+  uid INT NOT NULL,
+  aid INT NOT NULL,
+  PRIMARY KEY (uid, aid)
 );

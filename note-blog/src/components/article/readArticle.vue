@@ -12,11 +12,10 @@
                       <!-- Post meta content-->
                       <div class="text-muted fst-italic mb-2">Posted on {{ ctime }}</div>
                       <!-- Post categories-->
-                      <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>
-                      <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>
+                      <routerLink class="badge bg-secondary text-decoration-none link-light" to="/"><span @click="keyWord">{{category}}</span></routerLink>
                   </header>
                   <!-- Preview image figure-->
-                  <figure class="mb-4"><img class="img-fluid rounded" src="https://dummyimage.com/900x400/ced4da/6c757d.jpg" alt="..." /></figure>
+                  <figure class="mb-4"><img class="img-fluid rounded" :src="src" alt="..." v-if="img !== null" width="900px" height="400px" style="box-shadow:3px 3px 12px gray;padding:3px;"></figure>
                   <!-- Post content-->
                   <section class="mb-5" v-html="content">
                       <!-- <p class="fs-5 mb-4">Science is an enterprise that should be cherished as an activity of the free human mind. Because it transforms who we are, how we live, and it gives us an understanding of our place in the universe.</p>
@@ -27,6 +26,16 @@
                       <p class="fs-5 mb-4">Venus has a runaway greenhouse effect. I kind of want to know what happened there because we're twirling knobs here on Earth without knowing the consequences of it. Mars once had running water. It's bone dry today. Something bad happened there as well.</p> -->
                   </section>
               </article>
+              <a href="javascript:void(0);" @click="likeArticle">
+                <template v-if="thumbsActive == 1">
+                <div>
+                  <i class="far fa-thumbs-up"></i>
+                </div>
+              </template>
+              <template>
+                <div v-if="thumbsActive == 2"><i class="fas fa-thumbs-up"></i></div>
+              </template>
+              </a><span v-if="isNumOfLikeAlive">{{numOfLike}}</span>
               <!-- Comments section-->
               <section class="mb-5">
                   <div class="card bg-light">
@@ -52,7 +61,6 @@
                                           {{item2.cmtcontent}}
                                       </div>
                                     </div>
-
                                   </div>
                                   <!-- Child comment 2
                                   <div class="d-flex mt-4">
@@ -84,6 +92,10 @@
   </div>
 </template>
 <script>
+  import fontawesome from '@fortawesome/fontawesome'
+  import { faThumbsUp } from '@fortawesome/fontawesome-free-regular'
+  // import { faThumbsUp } from '@fortawesome/fontawesome-free-solid'
+  fontawesome.library.add(faThumbsUp)
   export default {
     inject: ['reload'],
     data() {
@@ -95,7 +107,14 @@
         comment: '',
         childComment: '',
         show: 0,
-        isRouterAlive: true
+        isRouterAlive: true,
+        isNumOfLikeAlive: true,
+        img: '',
+        src: '',
+        cid: '',
+        category: '',
+        thumbsActive: 1,
+        numOfLike: 0,
       }
     },
     props: ['aid'],
@@ -114,16 +133,40 @@
         let url = 'read';
         this.axios.get(url, { params: obj } ).then((res) => {
           console.log(res);
-          this.aInfo = res.data.sort((a, b) => {
+          this.aInfo = res.data.data.sort((a, b) => {
             return b.commentid - a.commentid;
           });
           this.title = this.aInfo[0].title;
           this.content = this.aInfo[0].content;
-          this.ctime = this.aInfo[0].ctime;
+          this.ctime = new Date(this.aInfo[0].ctime);
+          this.img = this.aInfo[0].img;
+          this.cid = this.aInfo[0].cid;
+          this.src = this.articleImg + this.img;
+          this.$store.commit("updateTopic", this.cid);
+          console.log('點進文章topic', this.$store.getters.getTopic);
+          this.viewCount();
+          let url = 'category';
+          let obj = { cid: this.cid };
+          this.axios.get(url, { params: obj }).then(res => {
+            let code = res.data.code;
+            if (code == 1) {
+              this.category = res.data.data[0].cname;
+            }
+          })
+          let url2 = 'queryLikeArticle'
+          let obj2 = { aid }
+          this.axios.get(url2, { params: obj2 } ).then(res => {
+            console.log(res)
+            let code = res.data.code;
+            if (code == 1) {
+              this.thumbsActive = 1;
+            } else if (code == -1) {
+              this.thumbsActive = 2;
+            }
+            this.numOfLikeArticle();
+          })
         })
-        this.$store.commit("updateTopic", 0);
-        console.log('點進文章後監聽到變動', this.$store.getters.getTopic);
-        this.viewCount();
+
       },
       viewCount() {
         let aid = this.aid;
@@ -147,8 +190,6 @@
               this.reloadComment();
           }
         })
-
-
       },
       addChildComment(commentid) {
         let obj = { aid: this.aid, childComment: this.childComment, parentcmtid: commentid };
@@ -161,13 +202,66 @@
           }
         })
         this.show = 0;
-
       },
       reloadComment() {
         this.isRouterAlive = false;
         this.loadMore();
         this.$nextTick(function() {
           this.isRouterAlive = true;
+        })
+      },
+      keyWord() {
+        console.log('現在cid',this.cid)
+        this.$store.commit('updateTopic', this.cid);
+      },
+      likeArticle() {
+        let aid = this.aid;
+        let obj = { aid }
+        let url = 'queryLikeArticle'
+        this.axios.get(url, { params: obj } ).then(res => {
+          let code = res.data.code;
+          if (code == 1) {
+            let url = 'likeArticle'
+            this.axios.get(url, { params: obj } ).then(res => {
+              let code = res.data.code;
+              if (code == 0) {
+                this.$router.push('/signin');
+                return;
+              } else if (code == 1) {
+                this.thumbsActive = 2;
+                this.numOfLikeArticleReload();
+              }
+            })
+          } else if (code == -1) {
+            this.thumbsActive = 2;
+            let url = 'cancelLikeArticle';
+            this.axios.get(url, { params: obj } ).then(res => {
+              console.log(res)
+              let code = res.data.code;
+              if (code == 1) {
+                this.thumbsActive = 1;
+                this.numOfLikeArticleReload();
+              }
+            })
+          }
+        });
+      },
+      numOfLikeArticleReload() {
+        this.isNumOfLikeAlive = false;
+        this.numOfLikeArticle();
+        this.$nextTick(function() {
+          this.isNumOfLikeAlive = true;
+        })
+      },
+      numOfLikeArticle() {
+        let aid = this.aid;
+        let obj = { aid };
+        let url = 'numOfLikeArticle';
+        this.axios.get(url, { params: obj } ).then(res => {
+          let code = res.data.code;
+          if (code == 1) {
+            this.numOfLike = res.data.data[0]["COUNT(*)"];
+          }
         })
       }
     },

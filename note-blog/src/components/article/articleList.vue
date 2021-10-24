@@ -1,20 +1,21 @@
 <template>
-  <div>
+  <div class="container">
     <div v-if="this.articleInfo.length == 0 ">No Article</div>
     <div v-else-if="isAlive == true">
-      <select class="form-select" aria-label="Default select example" v-model="sort">
-        <option value="1" selected>最新</option>
+      <select class="form-select mb-2" aria-label="Default select example" v-model="sort" style="max-width: 150px;">
+        <option value="0" selected disabled>--文章排序--</option>
+        <option value="1">最新</option>
         <option value="2">熱門</option>
       </select>
-      <div class="card mb-3" style="max-width: 862px;"  v-for="(a, index) of articleInfo" :key="index" id="card">
+      <div class="card mb-3 mx-auto" style="max-width: 862px;"  v-for="(a, index) of pageOfItems" :key="index" id="card">
         <routerLink :to="'/read/'+a.aid">
           <div class="row no-gutters">
             <div class="col-md-4">
-              <img src="" class="card-img" alt="">
+              <img :src="a.img ? articleImg + a.img : '../img/defaultList.png'" class="card-img" alt="" width="294px" height="168px">
             </div>
             <div class="col-md-8">
               <div class="card-body" >
-                <h5 class="card-title">{{ a.title }}</h5><p>{{$store.getters.getTopic}}</p>
+                <h5 class="card-title">{{ a.title }}</h5>
                 <p class="card-text">{{ a.content | striptags }}</p>
                 <!-- Button trigger modal -->
                 <p class="card-text" id="countview"><small class="text-muted">瀏覽數：{{ a.viewcount ? a.viewcount : 0 }}</small></p>
@@ -23,7 +24,7 @@
           </div>
         </routerLink>
         <div v-if="$store.getters.getUid !== 0">
-          <router-link to="/">
+          <router-link :to="'/edit/'+a.aid">
             <i class="far fa-edit"></i>
           </router-link>
           <a type="" @click="deleteAid=a.aid;deleteTitle=a.title" href="javascript:;" data-toggle="modal" data-target="#exampleModal"><i class="far fa-trash-alt"></i></a>
@@ -39,7 +40,7 @@
                 </button>
               </div>
               <div class="modal-body">
-                您想刪除 " {{deleteTitle}} " 這篇文章嗎？
+                您將刪除 " {{deleteTitle}} " 這篇文章
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
@@ -49,28 +50,42 @@
           </div>
         </div>
       </div>
+      <jw-pagination  :items="filterSearch"  @changePage="onChangePage" :pageSize="pageSize" ></jw-pagination>
     </div>
-
   </div>
 </template>
 <script>
   import fontawesome from '@fortawesome/fontawesome'
   import { faEdit } from '@fortawesome/fontawesome-free-regular'
   fontawesome.library.add(faEdit)
+  import JwPagination from 'jw-vue-pagination';
   export default {
     data() {
       return {
         articleInfo: [],
         data: 0,
-        sort: 1,
+        sort: 0,
         deleteAid: 0,
         deleteTitle: '',
         isAlive: true,
+        img: '',
+        searchWords: '',
+        pageSize: 4,
+        pageOfItems: []
       }
+    },
+    components: {
+      JwPagination
     },
     mounted() {
      this.loadMore();
      console.log('現在uid', this.$store.getters.getUid);
+     this.$store.commit('updateListActive', false);
+    },
+    destroyed() {
+      this.$store.commit('updateSearchWords', '');
+      this.searchWords = '';
+      this.$store.commit('updateListActive', true);
     },
     watch: {
       '$store.state.topic':  function () {
@@ -81,6 +96,11 @@
       '$store.state.uid':  function () {
         console.log('監聽到uid變動', this.$store.getters.getUid)
         this.loadMore();
+      },
+      '$store.state.searchWords':  function () {
+        console.log('監聽到搜尋關鍵字變動', this.$store.getters.getSearchWords)
+        this.searchWords = this.$store.getters.getSearchWords;
+        console.log('現在關鍵字', this.searchWords)
       },
       sort (val) {
         console.log('現在排序方式', val)
@@ -96,7 +116,22 @@
         console.log(this.articleInfo)
       }
     },
+    computed: {
+      filterSearch() {
+        const set = new Set();
+        let result1 = this.articleInfo.filter(searchResult => searchResult.title.match(this.searchWords));
+        let result2 = this.articleInfo.filter(searchResult => searchResult.content.match(this.searchWords));
+        let result3 = result1.concat(result2);
+        const result = result3.filter(item => !set.has(item.aid) ? set.add(item.aid) : false);
+        return result;
+      }
+    },
     methods: {
+      onChangePage(pageOfItems) {
+        console.log(pageOfItems)
+        // this.reloadList();
+        this.pageOfItems = pageOfItems;
+      },
       loadMore(topic) {
         if(this.$store.getters.getUid == 0){
           console.log('現在topic', this.$store.getters.getTopic)
@@ -161,7 +196,9 @@
     },
     filters: {
       striptags(value) {
-        let strippedString = value.replace(/(<([^>]+)>)/gi, "");
+        const { convert } = require('html-to-text');
+        // let strippedString = value.replace(/(<([^>]+)>)/gi, "");
+        let strippedString = convert(value);
         return strippedString;
       }
     }

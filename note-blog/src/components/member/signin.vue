@@ -40,7 +40,9 @@
         this.axios.get(url, {params:obj}).then(res => {
           console.log(res.data);
           let code = res.data.code;
+          let session = res.data.session;
           if (code == 1) {
+            this.$store.commit('updatesUid', session);
             this.$router.push('/');
           }
         })

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Index from './components/pages/index.vue'
 import Write from './components/article/writeArticle.vue'
+import Edit from './components/article/editArticle.vue'
 import Read from './components/article/readArticle.vue'
 import List from './components/article/articleList.vue'
 // import Read from './components/article/readArticle.vue'
@@ -16,10 +17,18 @@ import Profilephoto from './components/member/profilePhoto.vue'
 
 Vue.use(Router)
 
+// 解决重复点击路由报错的BUG
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch((err) => err)
+}
+
 export default new Router({
     routes: [
       { path:'/',component:Index },
+      { path:'/index',component:Index, redirect: '/' },
       { path: '/write', component: Write },
+      { path: '/edit/:aid', component: Edit, props: true },
       { path: '/read/:aid', component: Read, props: true },
       // { path: '/list', component: List },
       { path: '/signin', component: Signin },

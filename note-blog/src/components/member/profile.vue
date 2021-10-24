@@ -18,12 +18,12 @@
               </div>
 
               <a href="javascript:void(0)" class="d-inline-block text-body">
-                <strong>234</strong>
-                <span class="text-muted">followers</span>
+                <strong>{{post}}</strong>
+                <span class="text-muted">posts</span>
               </a>
               <a href="javascript:void(0)" class="d-inline-block text-body ml-3">
-                <strong>111</strong>
-                <span class="text-muted">following</span>
+                <strong>{{gainLikeNum}}</strong>
+                <span class="text-muted">likes</span>
               </a>
             </div>
           </div>
@@ -40,9 +40,12 @@
             <a :class="tab3" href="#/profile/profilePhoto" @click="changeRight">新增頭像</a>
           </li>
         </ul>
-        <article-list v-if="isActive == 1"></article-list>
-        <edit-profile v-else-if="isActive == 2"></edit-profile>
-        <profile-photo v-else></profile-photo>
+        <div class="container">
+          <article-list v-if="isActive == 1"></article-list>
+          <edit-profile v-else-if="isActive == 2"></edit-profile>
+          <profile-photo v-else></profile-photo>
+        </div>
+
         <!-- Header -->
             <!-- / Info -->
 
@@ -361,6 +364,8 @@
     data() {
       return {
         userInfo: [],
+        post: 0,
+        gainLikeNum: 0,
         src:"",
         isActive: 1,
         tab1: {
@@ -412,6 +417,22 @@
             } else {
               this.src = `http://127.0.0.1:520/img/avatar/${this.userInfo.avatar}`
             }
+            // 查詢po文數
+            this.axios.get('listUser').then((res) => {
+              let code = res.data.code;
+              if (code == 1) {
+                this.post = res.data.data.length;
+                console.log('個人po文',this.post);
+              }
+            })
+            // 查詢獲讚數
+            this.axios.get('gainLikeNum').then((res) => {
+              let code = res.data.code;
+              if (code == 1) {
+                console.log('發送查詢獲讚數請求')
+                this.gainLikeNum = res.data.data;
+              }
+            })
           }
         })
       },

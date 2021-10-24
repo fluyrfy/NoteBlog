@@ -55,7 +55,8 @@ const pool=mysql.createPool({
   password:"",
   port:3306,
   connectionLimit:20,
-  database:"note_blog"
+  database:"note_blog",
+  charset: 'utf8mb4_general_ci'
 })
 
 // 創建web服務器
@@ -219,8 +220,15 @@ server.get('/signin', (req, res) => {
   })
 })
 
+// 用戶登出
+server.get('/signout', (req, res) => {
+  req.session.destroy();
+  console.log('現在session', req.session)
+})
+
 // 查詢用戶資料
 server.get('/queryUser', (req, res) => {
+  console.log('現在用戶介面',req.session)
   let uid = req.session.uid;
   let sql = `SELECT * FROM user WHERE uid = ?`
   if (!uid) {
@@ -289,9 +297,12 @@ server.post('/updateUser', (req, res) => {
 
 // 登入驗證
 server.get('/auth', (req, res) => {
+  console.log('登入驗證的',req.session.uid)
   let uid = req.session.uid;
   if (!uid) {
     res.send( { code: 0, msg: '用戶未登入' } );
+  } else {
+    res.send( { code: 1, msg: '用戶已登入', session: uid } );
   }
 })
 
@@ -327,31 +338,130 @@ server.post('/avatar', (req, res) => {
 })
 
 //------------------------------------------------------文章相關------------------------------------------------------
+// 初始化主題列表
+server.get('/category', (req, res) => {
+  console.log(req.query)
+  if (Object.keys(req.query).length !== 0) {
+    let cid = req.query.cid;
+    let sql = `SELECT cname FROM category WHERE cid = ?`
+    pool.query(sql, [cid], (err, result) => {
+      if (err) throw err;
+      res.send( {code:1, msg: '當前主題', data: result } );
+    })
+  }else if (JSON.stringify(req.query) === '{}'){
+    let sql = `SELECT * FROM category`
+    pool.query(sql, (err, result) => {
+      if (err) throw err;
+      res.send({ code: 1, msg: '初始化主題', data: result } );
+    })
+  }
+})
+
 // 新增文章
-server.get('/write', (req, res) => {
-  console.log(req.session.uid);
+server.post('/write', (req, res) => {
   let uid = req.session.uid;
   if (!uid) {
     res.send( { code: 0, msg: '請先登入' } );
     return;
   }
-  let t = req.query.topic;
-  let cg = req.query.category;
-  let ct = req.query.content;
-  let sql = `INSERT INTO article (cid, title, content, uid) VALUES (?, ?, ?, ?)`;
-  pool.query(sql, [cg, t, ct, uid], (err, result) => {
-    if (err) throw err;
-    if (result.affectedRows > 0) {
-      res.send( { code: 1, msg: '文章新增成功' } );
-    }else {
-      res.send( { code: -1, msg: '文章新增失敗' } );
+  let data = JSON.parse(req.body.data);
+  let category = data.category;
+  let title = data.title;
+  let content = data.content;
+  let params = [ category, title, content, uid ];
+  console.log(params)
+  let sql = `INSERT INTO article (cid, title, content, uid`;
+  let sql2 = ` VALUES (?, ?, ?, ?`;
+  if (req.files) {
+    let file = req.files.file;
+    let  getFileExtension = function (filename) {
+      return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
     }
-  })
+    let extension = getFileExtension(file.name);
+    if (extension !== undefined) {
+      let filename = `${uuidv4()}.${extension}`;
+      file.mv(`./public/img/article/${ filename }`, (err) => {
+        if (err) throw err;
+        console.log('圖片上傳成功');
+        params.splice(4, 0, filename);
+        sql += `, img = ?`;
+        sql2 += `, ?)`;
+        sql += sql2;
+        console.log(params, sql)
+        pool.query(sql, params, (err, result) => {
+          if (err) throw err;
+          if (result.affectedRows > 0) {
+            res.send( { code: 1, msg: '文章新增成功' } );
+          }else {
+            res.send( { code: -1, msg: '文章新增失敗' } );
+          }
+        })
+      })
+    }
+  }else {
+    sql += `)`;
+    sql2 += `)`;
+    sql += sql2;
+    pool.query(sql, params, (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.send( { code: 1, msg: '文章新增成功' } );
+      }else {
+        res.send( { code: -1, msg: '文章新增失敗' } );
+      }
+    })
+  }
 })
 
 // 修改文章
-server.get('/edit', (req, res) => {
-
+server.post('/edit', (req, res) => {
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+    return;
+  }
+  let data = JSON.parse(req.body.data);
+  let aid = data.aid;
+  let title = data.title;
+  let category = data.category;
+  let content = data.content;
+  let params = [ title, category, content, aid ];
+  let sql = `UPDATE article SET title = ?, cid = ?, content = ?`
+  if (req.files) {
+    let file = req.files.file;
+    let  getFileExtension = function (filename) {
+      return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
+    }
+    let extension = getFileExtension(file.name);
+    if (extension !== undefined) {
+      let filename = `${uuidv4()}.${extension}`;
+      file.mv(`./public/img/article/${ filename }`, (err) => {
+        if (err) throw err;
+        console.log('圖片上傳成功');
+        params.splice(3, 0, filename);
+        sql += `, img = ? WHERE aid = ?`
+        console.log(params, sql)
+        pool.query(sql, params, (err, result) => {
+          if (err) throw err;
+          if (result.affectedRows > 0) {
+            res.send( { code: 1, msg: '文章修改成功' } );
+          }else {
+            res.send( { code: -1, msg: '文章修改失敗' } );
+          }
+        })
+      })
+    }
+  }else {
+    sql += ` WHERE aid = ?`;
+    pool.query(sql, params, (err, result) => {
+      if (err) throw err;
+      if (result.affectedRows > 0) {
+        res.send( { code: 1, msg: '文章修改成功' } );
+      }else {
+        res.send( { code: -1, msg: '文章修改失敗' } );
+      }
+    })
+  }
 })
 
 // 刪除文章
@@ -372,7 +482,7 @@ server.get('/delete', (req, res) => {
 // 概覽文章
 server.get('/list', (req, res) => {
   let t = req.query.topic;
-  if (t == 0) {
+  if (t == 0 || t == undefined) {
     let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.status <> -1`;
     pool.query(sql, (err, result) => {
       if (err) throw err;
@@ -398,7 +508,7 @@ server.get('/list', (req, res) => {
 
 // 查詢個人文章列表
 server.get('/listUser', (req, res) => {
-  let u = req.query.uid;
+  let u = req.session.uid;
   let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.uid = ? AND a.status <> -1`
   pool.query(sql, [u], (err, result) => {
     if (err) {
@@ -407,6 +517,18 @@ server.get('/listUser', (req, res) => {
       res.send( { code: -1, msg: '目前暫無文章' })
     }else {
       res.send( { code: 1, msg: '查詢到文章', data: result } );
+    }
+  })
+})
+
+// 查詢個人獲讚數
+server.get('/gainLikeNum', (req, res) => {
+  let uid = req.session.uid;
+  let sql = `SELECT COUNT(a.aid) AS likeNum, a.uid, b.* FROM article AS a INNER JOIN likeArticle AS b on a.aid = b.aid where a.uid = ?`
+  pool.query(sql, [uid], (err, result) => {
+    if (err) throw err;
+    if (result.length !== 0) {
+      res.send({ code: 1, msg:'查詢獲讚數', data: result[0].likeNum });
     }
   })
 })
@@ -421,7 +543,7 @@ server.get('/read', (req, res) => {
     if (result.length == 0) {
       res.send( { code: -1, msg: '找不到此篇文章' } );
     }else {
-      res.send(result);
+      res.send({ code: 1, msg: '找到指定文章', data: result });
     }
   })
 })
@@ -512,14 +634,74 @@ server.post('/addChildComment', (req, res) => {
 
 //------------------------------------------------------收藏相關------------------------------------------------------
 // 收藏作者
-server.get('/likeAuthor', (req, res) => {
+// server.get('/likeAuthor', (req, res) => {
 
-})
+// })
 
 // 收藏文章
 server.get('/likeArticle', (req, res) => {
-
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+    return;
+  }
+  let aid = req.query.aid;
+  console.log(aid)
+  let sql = `INSERT INTO likeArticle (uid, aid) VALUES (?, ?)`
+  pool.query(sql, [ uid, aid ], (err, result) => {
+    if (err) throw err;
+    if (result.affectedRows > 0) {
+      res.send( { code: 1, msg: '按讚成功' } );
+    }else {
+      res.send( { code: -1, msg: '按讚失敗' } );
+    }
+  })
 })
+
+// 取消收藏文章
+server.get('/cancelLikeArticle', (req, res) => {
+  let uid = req.session.uid;
+  if (!uid) {
+    res.send( { code: 0, msg: '用戶未登入' } );
+    return;
+  }
+  let aid = req.query.aid;
+  let sql = `DELETE FROM likeArticle WHERE uid = ? AND aid = ?;`
+  pool.query(sql, [uid, aid], (err, result) => {
+    if (err) throw err;
+    if (result.affectedRows > 0) {
+      res.send( { code: 1, msg: '取消按讚成功' } );
+    }else {
+      res.send( { code: -1, msg: '取消按讚失敗' } );
+    }
+  })
+})
+
+// 查詢文章是否被收藏
+server.get('/queryLikeArticle', (req, res) => {
+  let uid = req.session.uid;
+  console.log(uid)
+  let aid = req.query.aid;
+  let sql = `SELECT * FROM likeArticle WHERE uid = ? AND aid = ?`
+  pool.query(sql, [uid, aid], (err, result) => {
+    if (err) throw err;
+    if (result.length == 0) {
+      res.send( { code: 1, msg: '尚未按讚' } );
+    }else {
+      res.send( { code: -1, msg: '已按讚' } );
+    }
+  })
+})
+
+// 查詢文章收藏數
+server.get('/numOfLikeArticle', (req, res) => {
+  let aid = req.query.aid;
+  let sql = `SELECT COUNT(*) FROM likearticle WHERE aid = ?;`
+  pool.query(sql, [ aid ], (err, result) => {
+    res.send( { code: 1, msg: '按讚數量', data: result } );
+  })
+})
+
 
 // 收藏主題
 server.get('/likeTopic', (req, res) => {
