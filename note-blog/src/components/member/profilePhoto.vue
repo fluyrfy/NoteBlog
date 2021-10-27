@@ -21,7 +21,7 @@
         disabled: true,
         file: '',
         filename: '',
-        dataURL: '//placehold.it/100',
+        dataURL: '../img/defaultEditAvatar.png',
       }
     },
     components: {

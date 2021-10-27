@@ -202,7 +202,7 @@ server.post('/signup', (req, res) => {
 server.get('/signin', (req, res) => {
   let e = req.query.email;
   let p = req.query.upwd;
-  let sql = `SELECT uid FROM user WHERE email = ? AND upwd = md5(?)`;
+  let sql = `SELECT uid, permission FROM user WHERE email = ? AND upwd = md5(?)`;
   pool.query(sql, [e,p], (err,result) => {
     if (err) throw err;
     if (result.length == 0) {
@@ -212,8 +212,10 @@ server.get('/signin', (req, res) => {
       // //獲取當前用戶登入id
       // //result=[RowDataPacket{uid:1}]
       let uid = result[0].uid;
+      let permission = result[0].permission;
       // //將用戶id保存session對象中
       req.session.uid=uid;
+      req.session.permission = permission;
       console.log(req.session)
       res.send( { code:1, msg:"登入成功", session: req.session } );
     }
@@ -349,7 +351,7 @@ server.get('/category', (req, res) => {
       res.send( {code:1, msg: '當前主題', data: result } );
     })
   }else if (JSON.stringify(req.query) === '{}'){
-    let sql = `SELECT * FROM category`
+    let sql = `SELECT * FROM category ORDER BY cid ASC`
     pool.query(sql, (err, result) => {
       if (err) throw err;
       res.send({ code: 1, msg: '初始化主題', data: result } );
@@ -384,7 +386,7 @@ server.post('/write', (req, res) => {
         if (err) throw err;
         console.log('圖片上傳成功');
         params.splice(4, 0, filename);
-        sql += `, img = ?`;
+        sql += `, img)`;
         sql2 += `, ?)`;
         sql += sql2;
         console.log(params, sql)
@@ -483,7 +485,7 @@ server.get('/delete', (req, res) => {
 server.get('/list', (req, res) => {
   let t = req.query.topic;
   if (t == 0 || t == undefined) {
-    let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.status <> -1`;
+    let sql = `SELECT a.*, b.uname FROM (SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.status <> -1) AS a LEFT JOIN user AS b ON a.uid=b.uid`;
     pool.query(sql, (err, result) => {
       if (err) throw err;
       if (result.length == 0) {
@@ -493,7 +495,7 @@ server.get('/list', (req, res) => {
       }
     })
   }else {
-    let sql = `SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.cid = ? AND a.status <> -1`;
+    let sql = `SELECT a.*, b.uname FROM (SELECT a.*, b.viewcount FROM article AS a LEFT JOIN (SELECT aid, COUNT(*) AS viewcount FROM viewcount GROUP BY aid) AS b ON a.aid = b.aid WHERE a.cid = ? AND a.status <> -1) AS a LEFT JOIN user AS b ON a.uid=b.uid`;
     pool.query(sql, [t], (err, result) => {
       if (err) {
         throw err;

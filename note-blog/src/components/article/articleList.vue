@@ -1,30 +1,32 @@
 <template>
-  <div class="container">
-    <div v-if="this.articleInfo.length == 0 ">No Article</div>
-    <div v-else-if="isAlive == true">
-      <select class="form-select mb-2" aria-label="Default select example" v-model="sort" style="max-width: 150px;">
+  <div class="">
+    <div v-if="this.articleInfo.length == 0 " class="text-center mt-5 border font-weight-bold">No Article</div>
+    <div v-else-if="isAlive == true" class="d-flex flex-column">
+      <select class="form-select my-2 align-self-end fa-font-awesome" aria-label="Default select example" v-model="sort" style="max-width: 150px;">
         <option value="0" selected disabled>--文章排序--</option>
         <option value="1">最新</option>
         <option value="2">熱門</option>
       </select>
-      <div class="card mb-3 mx-auto" style="max-width: 862px;"  v-for="(a, index) of pageOfItems" :key="index" id="card">
+      <div class="card mb-3 w-100 align-self-start position-relative shadow"  v-for="(a, index) of pageOfItems" :key="index" id="card" >
         <routerLink :to="'/read/'+a.aid">
-          <div class="row no-gutters">
-            <div class="col-md-4">
-              <img :src="a.img ? articleImg + a.img : '../img/defaultList.png'" class="card-img" alt="" width="294px" height="168px">
+          <div class="row pl-0">
+            <div class="col-lg-4">
+              <img :src="a.img ? articleImg + a.img : '../img/defaultList.png'" class="card-img h-100 img-thumbnail" alt="" >
             </div>
-            <div class="col-md-8">
-              <div class="card-body" >
-                <h5 class="card-title">{{ a.title }}</h5>
-                <p class="card-text">{{ a.content | striptags }}</p>
+            <div class="col-lg-8">
+              <div class="card-body h-100 d-flex flex-column position-relative pb-4" >
+                <h4 class="card-title"><strong>{{ a.title }}</strong></h4>
+                <p class="card-text text-muted mb-2"><span v-if="$store.getters.getUid == 0" class="mr-2"><i class="fas fa-user-edit"></i><I class="mr-2 ml-1">{{ a.uname }}</I></span><i class="far fa-calendar-alt"></i><I class="ml-2">{{ a.ctime | timestampFormat }}</I></p>
+                <div style=" height: 48px;"><p class="card-text articleContent">{{ a.content | striptags }}</p></div>
+
                 <!-- Button trigger modal -->
-                <p class="card-text" id="countview"><small class="text-muted">瀏覽數：{{ a.viewcount ? a.viewcount : 0 }}</small></p>
+                <p class="card-text" id="countview"><small class="text-muted position-absolute bottom-0 end-0">瀏覽數：{{ a.viewcount ? a.viewcount : 0 }}&nbsp;</small></p>
               </div>
             </div>
           </div>
         </routerLink>
-        <div v-if="$store.getters.getUid !== 0">
-          <router-link :to="'/edit/'+a.aid">
+        <div v-if="$store.getters.getUid !== 0 || $store.getters.getPermission == 1" class="position-absolute top-0 end-0 mt-2 mr-2">
+          <router-link :to="'/edit/'+a.aid" class="mr-2">
             <i class="far fa-edit"></i>
           </router-link>
           <a type="" @click="deleteAid=a.aid;deleteTitle=a.title" href="javascript:;" data-toggle="modal" data-target="#exampleModal"><i class="far fa-trash-alt"></i></a>
@@ -50,14 +52,18 @@
           </div>
         </div>
       </div>
-      <jw-pagination  :items="filterSearch"  @changePage="onChangePage" :pageSize="pageSize" ></jw-pagination>
+      <jw-pagination  :items="filterSearch"  @changePage="onChangePage" :pageSize="pageSize" class="align-self-center mb-2"></jw-pagination>
     </div>
   </div>
 </template>
 <script>
   import fontawesome from '@fortawesome/fontawesome'
   import { faEdit } from '@fortawesome/fontawesome-free-regular'
-  fontawesome.library.add(faEdit)
+  import { faCalendarAlt, faNewspaper } from '@fortawesome/fontawesome-free-regular'
+  import { faUserEdit } from '@fortawesome/fontawesome-free-solid'
+  fontawesome.library.add(faEdit, faNewspaper)
+  fontawesome.library.add(faCalendarAlt)
+  fontawesome.library.add(faUserEdit)
   import JwPagination from 'jw-vue-pagination';
   export default {
     data() {
@@ -200,6 +206,11 @@
         // let strippedString = value.replace(/(<([^>]+)>)/gi, "");
         let strippedString = convert(value);
         return strippedString;
+      },
+      timestampFormat(value) {
+        value= new Date(Date.parse(value));
+        let newDate = `${value.getFullYear()}-${value.getMonth()+1}-${value.getDate()}`
+        return newDate;
       }
     }
   }
@@ -208,5 +219,16 @@
   #countview {
     text-align: right;
   }
-
+  .articleContent {
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+  }
+  select {
+  font-family: "Open Sans";
+  }
 </style>

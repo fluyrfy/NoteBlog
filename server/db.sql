@@ -1,5 +1,8 @@
 -- #db.sql 創建表添加數據
 
+-- 資料庫
+CREATE DATABASE note_blog;
+
 -- 用戶表
 CREATE TABLE user(
   uid INT PRIMARY KEY  NOT NULL AUTO_INCREMENT,

@@ -39,6 +39,7 @@ let store = new Vuex.Store({
     sUid: 0,
     searchWords: '',
     listActive: '',
+    permission: 0,
   },
   mutations: {
     updateTopic(state, topic) {
@@ -56,6 +57,9 @@ let store = new Vuex.Store({
     updateListActive(state, listActive) {
       state.listActive = listActive;
     },
+    updatePermission(state, permission) {
+      state.permission = permission;
+    },
   },
   getters: {  //集中獲取數據函數
     getTopic(state) {
@@ -72,6 +76,9 @@ let store = new Vuex.Store({
     },
     getListActive(state) {
       return state.listActive;
+    },
+    getPermission(state) {
+      return state.permission;
     },
   }
 })

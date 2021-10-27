@@ -1,17 +1,18 @@
 <template>
   <div id="app" class="container">
-    <top-bar></top-bar>
-    <div class="d-flex">
-      <left-bar></left-bar>
-      <router-view v-if="isRouterAlive"></router-view>
+    <header><top-bar></top-bar></header>
+    <div class="row justify-content-between" id="body">
+      <left-bar class="col-lg-3 "></left-bar>
+      <router-view v-if="isRouterAlive" class="col-lg-9"></router-view>
     </div>
-
+    <footer><foot-bar></foot-bar></footer>
   </div>
 </template>
 
 <script>
 import topBar from './components/bar/topBar.vue'
 import leftBar from './components/bar/leftBar.vue'
+import footBar from './components/bar/footer.vue'
 export default {
   provide () {
     return{
@@ -26,6 +27,7 @@ export default {
   components: {
     'topBar': topBar,
     'leftBar': leftBar,
+    footBar,
   },
   methods: {
     reload() {

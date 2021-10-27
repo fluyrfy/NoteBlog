@@ -3,17 +3,17 @@
     <div class="layout-content">
 
       <!-- Content -->
-      <div class="container flex-grow-1 container-p-y">
+      <div class="flex-grow-1 container-p-y">
 
         <!-- Header -->
-        <div class="container-m-nx container-m-ny theme-bg-white mb-4" >
+        <div class="container-m-nx container-m-ny theme-bg-white mb-3" >
           <div class="media col-md-10 col-lg-8 col-xl-7 py-5 mx-auto">
             <img :src="src" alt="" class="rounded-circle img-thumbnail" width="110px" height="110px" v-if="isAlive">
             <div class="media-body ml-5" >
               <h4 class="font-weight-bold mb-4">{{ userInfo.uname }}</h4>
 
               <div class="text-muted mb-4">
-                Lorem ipsum dolor sit amet, nibh suavitate qualisque ut nam. Ad harum primis electram duo, porro principes ei has.
+                <!-- Lorem ipsum dolor sit amet, nibh suavitate qualisque ut nam. Ad harum primis electram duo, porro principes ei has. -->
                 {{ userInfo.selfintro }}
               </div>
 

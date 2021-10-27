@@ -1,44 +1,50 @@
 <template>
   <div>
 
-    <div class="container bootstrap snippets bootdey">
-    <div class="row container">
+    <div class="container bootstrap snippets bootdey mt-2">
+    <div class=" ">
 
         <!-- edit form column -->
-        <div class="col-md-9 personal-info">
-          <div class="alert alert-info alert-dismissable">
+        <div class=" personal-info">
+          <!-- <div class="alert alert-info alert-dismissable">
             <a class="panel-close close" data-dismiss="alert">×</a>
             <i class="fa fa-coffee"></i>
             This is an <strong>.alert</strong>. Use this to show important messages to the user.
-          </div>
-          <h3>Personal info</h3>
+          </div> -->
+          <!-- <h3>Personal info</h3> -->
 
-          <div class="form-horizontal" role="form">
-            <div class="form-group">
-              <label class="col-lg-3 control-label" >暱稱:</label>
+          <div class="row justify-content-lg-around" role="form">
+            <div class="col-6 row">
+              <label class="col-lg-4 control-label py-2" >電子郵件:</label>
+              <div class="col-lg-8">
+                <input class="form-control" type="text" placeholder="新電郵" v-model="uname">
+              </div>
+            </div>
+            <div class="col-6 row">
+              <label class="col-lg-4 control-label py-2" >暱稱:</label>
               <div class="col-lg-8">
                 <input class="form-control" type="text" placeholder="新暱稱" v-model="uname">
               </div>
             </div>
-            <div class="form-group">
-              <label class="col-lg-3 control-label">新密碼:</label>
+            <div class="col-6 row">
+              <label class="col-lg-4 control-label py-2">新密碼:</label>
               <div class="col-lg-8">
                 <input class="form-control" type="password" placeholder="新密碼" v-model="upwd">
               </div>
             </div>
-            <div class="form-group">
-              <label class="col-lg-3 control-label">確認新密碼:</label>
-              <div class="col-lg-8">
+            <div class="col-6 row">
+              <label class="col-lg-4 control-label py-2 pr-0">確認新密碼:</label>
+              <div class="col-lg-8 align-items-lg-start pl-0">
                 <input class="form-control" type="password" placeholder="確認新密碼" v-model="cfupwd">
               </div>
             </div>
-            <div class="form-group">
+            <div class="">
               <label class="col-lg-3 control-label">個人簡介:</label>
               <div class="col-lg-8">
-                <input class="form-control" type="text" v-model="selfIntro" placeholder="留下你的自我介紹">
+                <textarea class="form-control" type="text" v-model="selfIntro" placeholder="留下你的自我介紹"></textarea>
               </div>
             </div>
-            <button type="" @click="updateUser" class="btn btn-primary">修改</button>
+            <button type="" @click="updateUser" class="btn btn-primary mt-2 w-25">修改</button>
           </div>
         </div>
     </div>

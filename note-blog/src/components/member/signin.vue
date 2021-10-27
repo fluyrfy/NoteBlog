@@ -14,7 +14,7 @@
             <input type="checkbox" value="remember-me"> Remember me
           </label>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit" @click="signin">Sign in</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" @click.prevent="signin">Sign in</button>
         <div id="divspan"><span>還沒有帳號嗎?<router-link to="/signup">註冊</router-link></span></div>
         <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
       </form>
@@ -41,9 +41,14 @@
           console.log(res.data);
           let code = res.data.code;
           let session = res.data.session;
+          console.log(session);
+          let uid = session.uid;
+          let permission = session.permission;
           if (code == 1) {
-            this.$store.commit('updatesUid', session);
+            this.$store.commit('updatesUid', uid);
+            this.$store.commit('updatePermission', permission);
             this.$router.push('/');
+            console.log('現在保存的權限', this.$store.getters.getPermission)
           }
         })
       }

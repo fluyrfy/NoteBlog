@@ -1,27 +1,32 @@
 <template>
-  <div class="container">
-    <h1 class="text-primary"><span class="glyphicon glyphicon-user"></span>撰寫文章</h1>
-    <select class="form-select" aria-label="Default select example" v-model="category">
-      <option selected>選擇主題</option>
-      <option :value="c.cid" v-for="(c, index) of initCategory" :key="index">{{c.cname}}</option>
-    </select>
-    <div class="row">
-        <!-- left column -->
-        <!-- edit form column -->
-        <div>
-          <h3 class="col-3">標題</h3><input type="" name="" value="" class="form form-control" placeholder="" v-model="title">
-          <h3>內容</h3>
-        </div>
+  <div class="">
+    <!-- <h1 class="text-primary"><span class="glyphicon glyphicon-user"></span>撰寫文章</h1> -->
+    <div class="row px-3 mt-2">
+      <select class="form form-select col py-0" aria-label="Default select example" v-model="category">
+        <option selected disabled>--選擇主題--</option>
+        <option :value="c.cid" v-for="(c, index) of initCategory" :key="index">{{c.cname}}</option>
+      </select>
+      <div class="col d-flex flex-nowrap justify-content-around align-items-center">
+        <ImgCutter @cutDown="cutDown"
+        :boxWidth="1000"
+        :boxHeight="500"
+        :cutWidth="900"
+        :cutHeight="400"
+        :sizeChange="false"
+        class="col-3">
+        </ImgCutter>
+        <p class="py-1 m-0">{{filename}}</p>
+      </div>
     </div>
-    <hr>
-    <div id="wangeditor"></div>
-    <ImgCutter @cutDown="cutDown"
-    :boxWidth="1000"
-    :boxHeight="500"
-    :cutWidth="900"
-    :cutHeight="400"
-    :sizeChange="false">
-    </ImgCutter>
+
+    <div class="mt-2">
+      <h3 class="">標題</h3><input type="" name="" value="" class="form form-control" placeholder="想個好標題吧！" v-model="title">
+    </div>
+    <div class="d-flex flex-wrap mt-2">
+      <h4>內容</h4>
+      <div id="wangeditor" class=""></div>
+    </div>
+
     <button class="btn btn-lg btn-primary"  @click="editArticle">修改文章</button>
   </div>
 </template>
