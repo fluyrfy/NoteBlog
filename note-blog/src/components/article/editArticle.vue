@@ -27,7 +27,7 @@
       <div id="wangeditor" class=""></div>
     </div>
 
-    <button class="btn btn-lg btn-primary"  @click="editArticle">修改文章</button>
+    <button class="btn btn-lg btn-primary mt-2"  @click="editArticle">修改文章</button>
   </div>
 </template>
 <script>
@@ -73,13 +73,10 @@
                 this.axios.get(url, { params: obj }).then(res => {
                   let code = res.data.code;
                   if (code == 1) {
-                    console.log(res.data.data);
                     this.aInfo = res.data.data[0];
-                    console.log(this.aInfo);
                     this.title = this.aInfo.title;
                     this.category = this.aInfo.cid;
                     this.initContent = this.aInfo.content;
-                    console.log(this.initContent)
                     const editor = new Editor("#wangeditor")
                     // editor.customConfig.onchange = (html) => {
                     //   this.bulletconcent = html;
@@ -88,7 +85,6 @@
                     editor.create()
                     editor.txt.html(this.initContent);
                     editor.config.onchange = (text) => {
-                      console.log(text);
                       this.content = text;
                     }
                   }
@@ -120,7 +116,6 @@
           },
         }).then((res) => {
           let code = res.data.code;
-          console.log(code);
           if (code == 0) {
             this.$router.push('/signin');
           }else if (code == 1) {

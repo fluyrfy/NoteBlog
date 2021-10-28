@@ -3,7 +3,7 @@
     <div class="d-flex flex-column flex-shrink-0 p-3 mr-0 bg-light" >
       <a href="#/" class="d-flex mb-3 mb-md-0 link-dark text-decoration-none">
         <!-- <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg> -->
-        <div class="fs-4 offset-5">主題</div>
+        <div class="fs-4 align-items-center">主題</div>
       </a>
       <hr class="mt-0">
       <router-link to="/">
@@ -37,12 +37,10 @@
           let code = res.data.code;
           if (code == 1) {
             this.category = res.data.data;
-            console.log(this.$store.getters.getPermission)
           }
         })
       },
       articleList(index) {
-        console.log(index);
         this.$store.commit("updateTopic", index);
         this.selected = this.$store.getters.getTopic;
       }

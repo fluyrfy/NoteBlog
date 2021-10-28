@@ -19,8 +19,7 @@ axios.defaults.baseURL="http://127.0.0.1:520/" //測試時地址欄不可輸入h
 // Vue.use(aios) axios不支持這種寫法
 //註冊到原型
 Vue.prototype.axios=axios
-Vue.prototype.avatar = "http://127.0.0.1:520/img/avatar/";
-Vue.prototype.articleImg = "http://127.0.0.1:520/img/article/";
+
 
 Vue.use(VueReCaptcha, {
   siteKey: '6Le57aQcAAAAAM8MNRlnB-rK3UdgNPyCgHINBRzz',
@@ -82,6 +81,11 @@ let store = new Vuex.Store({
     },
   }
 })
+
+
+Vue.prototype.avatar = "http://127.0.0.1:520/img/avatar/";
+// Vue.prototype.avatar = avatar;
+Vue.prototype.articleImg = "http://127.0.0.1:520/img/article/";
 
 new Vue({
   router,

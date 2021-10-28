@@ -43,7 +43,6 @@
           data: formData,
           headers: { "Content-Type": "multipart/form-data" },
         }).then((res) => {
-          console.log(res)
           let code = res.data.code;
           if (code == 1) {
             this.dataURL = '//placehold.it/100';

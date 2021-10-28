@@ -2,29 +2,42 @@
   <div class="container">
     <div class="text-center">
       <div class="form-signin">
+        <ValidationObserver v-slot="{ invalid }">
         <img class="mb-4" src="bootstrap-solid.svg" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Please sign up</h1>
         <label for="inputEmail" class="sr-only" >uname</label>
-        <input type="" id="inputUname" class="form-control" placeholder="uname" required="" autofocus="" v-model="uname" name="uname">
+        <ValidationProvider role="required" v-slot="{ errors }"><input type="text" id="inputUname" class="form-control" placeholder="用戶名" required="" autofocus="" v-model="uname" name="uname"><span class="badge badge-danger mb-1">{{ errors[0] }}</span></ValidationProvider>
         <label for="inputEmail" class="sr-only" >Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" v-model="email" name="email" @input="verifyEmail"><span style="background: red;">{{ emailWarn }}</span>
+        <ValidationProvider rules="required|email" v-slot="{ errors }"><input type="email" id="inputEmail" class="form-control" placeholder="電子郵件" required="" autofocus="" v-model="email" name="" @input="verifyEmail"><span class="badge badge-danger mb-1">{{ errors[0] }}</span></ValidationProvider>
+        <ValidationObserver>
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" v-model="upwd" name="upwd">
+        <ValidationProvider rules="confirmed:confirmation" v-slot="{ errors }">
+        <input type="password" id="inputPassword" class="form-control" placeholder="密碼" required="" v-model="upwd" name="upwd"><span class="badge badge-danger mb-1">{{ errors[0] }}</span>
+        </ValidationProvider>
         <label for="inputPassword" class="sr-only">confirm Password</label>
-        <input type="password" id="inputConfirmPassword" class="form-control" placeholder="Confirm Password" required="" v-model="cfupwd">
+        <ValidationProvider v-slot="{ errors }" vid="confirmation">
+        <input type="password" id="inputConfirmPassword" class="form-control" placeholder="確認密碼" required="" v-model="cfupwd"><span class="badge badge-danger mb-1">{{ errors[0] }}</span>
+        </ValidationProvider>
+        </ValidationObserver>
         <div class="checkbox mb-3">
-          <label>
-            <input type="checkbox" value="remember-me"> I'm not robot
-          </label>
         </div>
-        <button :class="btnClass"  @click="recaptcha">Sign up</button>
-        <div id="divspan"><span>已經是會員了嗎?<router-link to="/signin">登入</router-link></span></div>
+        <button :class="btnClass"  @click="recaptcha" :disabled="invalid">Sign up</button>
+        </ValidationObserver>
+        <div id="divspan"><span>已經是會員了嗎?<router-link to="/signin" class="text-decoration-underline">登入</router-link></span></div>
         <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
       </div>
     </div>
   </div>
 </template>
 <script>
+  import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
+  import { required, email, confirmed } from 'vee-validate/dist/rules';
+  extend('email', {...email, message:'電郵地址無效'});
+  extend('confirmed', {...confirmed, message:'確認密碼不相符'});
+  extend('required', {
+  ...required,
+  message: '必填欄位'
+  });
   export default {
     data() {
       return {
@@ -47,6 +60,8 @@
       }
     },
     components: {
+      'ValidationProvider':ValidationProvider,
+      ValidationObserver
     },
     methods: {
       verifyEmail() {
@@ -67,13 +82,12 @@
           this.$recaptchaLoaded().then(() => {
             console.log("recaptcha loaded");
             this.$recaptcha("signup").then((token) => {
-              console.log({token}); // Will print the token
+              // console.log({token}); // Will print the token
               let u = this.uname;
               let e = this.email;
               let p = this.upwd;
               let url = 'signup';
               this.axios.post(url, ( { uname: u, email: e, upwd: p, token: token } )).then(res => {
-                console.log(res);
                 let code = res.data.code;
                 if (code == 1) {
                   this.$router.push('/signin');
@@ -115,8 +129,10 @@
   .form-signin .checkbox {font-weight: 400; margin-top: 20px;}
   .form-signin .form-control {position: relative;box-sizing: border-box;height: auto;padding: 10px;font-size: 16px;}
   .form-signin .form-control:focus {z-index: 2;}
-  .form-signin input[type="email"] {margin-bottom: -1px;border-bottom-right-radius: 0;border-bottom-left-radius: 0;}
-  .form-signin input[type="password"] {margin-bottom: 10px;border-top-left-radius: 0;border-top-right-radius: 0;}
+  .form-signin input[type="text"] {margin-bottom: -1px;border-bottom-right-radius: 0;border-bottom-left-radius: 0;}
+  .form-signin input[type="email"] {margin-bottom: -1px;border-bottom-right-radius: 0;border-bottom-left-radius: 0;border-top-left-radius: 0;border-top-right-radius: 0;}
+  .form-signin input[type="password"] {margin-bottom: -1px;border-top-left-radius: 0;border-top-right-radius: 0;
+    border-bottom-right-radius: 0;border-bottom-left-radius: 0;}
   form {
     position: relative;
   }

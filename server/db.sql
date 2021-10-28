@@ -9,7 +9,7 @@ CREATE TABLE user(
   uname VARCHAR(40) NOT NULL,
   email VARCHAR(40) NOT NULL,
   upwd VARCHAR(32) NOT NULL,
-  avatar VARCHAR(50),
+  avatar VARCHAR(300),
   selfintro VARCHAR(100),
   ctime TIMESTAMP NOT NULL DEFAULT current_timestamp ,
   permission BOOLEAN NOT NULL DEFAULT 0

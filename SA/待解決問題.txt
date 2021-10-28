@@ -95,8 +95,24 @@ live:.cid.afb7aef751f22399
 下周進度：
 	依照進度表繼續進行
 
+------------------------------w4------------------------------
+完成項目：
+	1.文章縮圖
+	2.用戶功能-管理文章(用戶自己管理與管理員管理)
+	3.用戶登出(destroy session)
+	4.修改個人資料
+	5.搜尋功能(js-set、vue-filter、match)
+	6.文章LIKE功能和個人資料的總貼文數與總LIKE數顯示(主題珍藏不做)
+	7.文章列表分頁功能(vue-JwPagination)
+	8.所有欄位驗證(email格式、確認密碼相符、所有必填欄位)
+	9.所有css調整
+	10.功能測試
+
+待解決問題：
+	1.第三方登入
 
 
 
+https://drive.google.com/drive/folders/117dOqoXBHd0DYPo6x6Fumwr87BLz3vkQ?usp=sharing
 
 

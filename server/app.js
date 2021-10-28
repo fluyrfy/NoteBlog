@@ -95,11 +95,11 @@ server.use(fileupload());
 // 用戶註冊
 server.post('/signup', (req, res) => {
   req.on('data', (data) => {
-    console.log(data);
+
 
     // 註冊資料及驗證資料
     data = JSON.parse(data.toString());
-    console.log(data)
+
     var token = data.token;
 
     //密鑰
@@ -113,7 +113,6 @@ server.post('/signup', (req, res) => {
         method: 'post',
         url: verifyUrl,
       }).then(result => {
-        console.log(result.data);
         if (result.data.success == true) {
           let uname = data.uname;
           let email = data.email;
@@ -122,8 +121,6 @@ server.post('/signup', (req, res) => {
           pool.query(sql,email, (err, result) => {
             if (err) {
               throw err;
-            }else {
-              console.log(result);
             }
             if (result.length == 0) {
               var sql = `INSERT INTO user (uname, email, upwd) VALUES (?, ?, md5(?))`
@@ -177,7 +174,6 @@ server.post('/signup', (req, res) => {
   //   if (err) {
   //     throw err;
   //   }else {
-  //     console.log(result);
   //   }
   //   if (result.length == 0) {
   //     var sql = `INSERT INTO user (uname, email, upwd) VALUES ('${uname}', '${email}', md5('${upwd}'))`
@@ -198,6 +194,55 @@ server.post('/signup', (req, res) => {
   // })
 })
 
+//google註冊
+server.get('/googleSignup', (req, res) => {
+  let e = req.query.email;
+  let sql = `SELECT email, uid, permission FROM user WHERE email = ?`
+  pool.query(sql, [e], (err,result) => {
+    if(err) throw err;
+    if (result.length == 0 ) {
+      let email = req.query.email;
+      let uname = req.query.uname;
+      let upwd = req.query.upwd;
+      let avatar = req.query.avatar;
+      let sql = `INSERT INTO user(uname, email, upwd, avatar, permission) VALUES (?, ?, md5(?), ?, ?)`
+      pool.query(sql, [uname, email, upwd, avatar, 6], (err, result) => {
+        if (err) throw err;
+        if (result.affectedRows > 0) {
+          let email = req.query.email;
+          let sql = `SELECT uid, permission FROM user WHERE email = ?`
+          pool.query(sql, [email], (err, result) => {
+            if (err) throw err;
+            if (result.length !== 0) {
+              let uid = result[0].uid;
+              let permission = result[0].permission;
+              // //將用戶id保存session對象中
+              req.session.uid=uid;
+              req.session.permission = permission;
+              let uname = req.query.uname;
+              let avatar = req.query.avatar;
+              let sql = `UPDATE user SET uname = ?, avatar = ? WHERE uid = ?`
+              pool.query(sql, [uname, avatar, uid], (err, result) => {
+                if (err) throw err;
+                if (result.affectedRows > 0) {
+                  res.send( { code: 1, msg: 'google登入成功', data: req.session } )
+                }
+              })
+            }
+          })
+        }
+      })
+    } else {
+      let uid = result[0].uid;
+      let permission = result[0].permission;
+      // //將用戶id保存session對象中
+      req.session.uid=uid;
+      req.session.permission = permission;
+      res.send( { code: 1, msg: 'google登入成功', data: req.session } )
+    }
+  })
+})
+
 // 用戶登入
 server.get('/signin', (req, res) => {
   let e = req.query.email;
@@ -208,7 +253,6 @@ server.get('/signin', (req, res) => {
     if (result.length == 0) {
       res.send( { code: -1, msg: '帳號或密碼有誤' } );
     }else {
-      console.log(result);
       // //獲取當前用戶登入id
       // //result=[RowDataPacket{uid:1}]
       let uid = result[0].uid;
@@ -216,7 +260,6 @@ server.get('/signin', (req, res) => {
       // //將用戶id保存session對象中
       req.session.uid=uid;
       req.session.permission = permission;
-      console.log(req.session)
       res.send( { code:1, msg:"登入成功", session: req.session } );
     }
   })
@@ -225,12 +268,10 @@ server.get('/signin', (req, res) => {
 // 用戶登出
 server.get('/signout', (req, res) => {
   req.session.destroy();
-  console.log('現在session', req.session)
 })
 
 // 查詢用戶資料
 server.get('/queryUser', (req, res) => {
-  console.log('現在用戶介面',req.session)
   let uid = req.session.uid;
   let sql = `SELECT * FROM user WHERE uid = ?`
   if (!uid) {
@@ -255,8 +296,6 @@ server.post('/updateUser', (req, res) => {
   }
   req.on('data', data => {
     data = JSON.parse(data.toString());
-    console.log(uid)
-    console.log(data)
     let uname = data.uname;
     let upwd = data.upwd;
     let selfIntro = data.selfIntro;
@@ -285,7 +324,6 @@ server.post('/updateUser', (req, res) => {
     }
     sql += `WHERE uid = ?`
     params.push(uid);
-    console.log(sql, params)
     pool.query(sql, params, (err, result) => {
       if (err) throw err;
       if (result.affectedRows > 0) {
@@ -299,7 +337,6 @@ server.post('/updateUser', (req, res) => {
 
 // 登入驗證
 server.get('/auth', (req, res) => {
-  console.log('登入驗證的',req.session.uid)
   let uid = req.session.uid;
   if (!uid) {
     res.send( { code: 0, msg: '用戶未登入' } );
@@ -312,7 +349,6 @@ server.get('/auth', (req, res) => {
 server.post('/avatar', (req, res) => {
   let uid = req.session.uid;
   if (req.files) {
-    console.log(req.files);
     let file = req.files.file;
     let  getFileExtension = function (filename) {
       return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
@@ -322,7 +358,6 @@ server.post('/avatar', (req, res) => {
       let filename = `${uuidv4()}.${extension}`;
       file.mv(`./public/img/avatar/${ filename }`, (err) => {
         if (err) throw err;
-        console.log('圖片上傳成功');
       })
       let sql = `UPDATE user SET avatar = ? WHERE uid = ?`;
         pool.query(sql, [filename, uid], (err, result) => {
@@ -335,14 +370,13 @@ server.post('/avatar', (req, res) => {
         })
     }
   } else {
-    console.log('無資料');
+    return;
   }
 })
 
 //------------------------------------------------------文章相關------------------------------------------------------
 // 初始化主題列表
 server.get('/category', (req, res) => {
-  console.log(req.query)
   if (Object.keys(req.query).length !== 0) {
     let cid = req.query.cid;
     let sql = `SELECT cname FROM category WHERE cid = ?`
@@ -371,7 +405,6 @@ server.post('/write', (req, res) => {
   let title = data.title;
   let content = data.content;
   let params = [ category, title, content, uid ];
-  console.log(params)
   let sql = `INSERT INTO article (cid, title, content, uid`;
   let sql2 = ` VALUES (?, ?, ?, ?`;
   if (req.files) {
@@ -384,12 +417,10 @@ server.post('/write', (req, res) => {
       let filename = `${uuidv4()}.${extension}`;
       file.mv(`./public/img/article/${ filename }`, (err) => {
         if (err) throw err;
-        console.log('圖片上傳成功');
         params.splice(4, 0, filename);
         sql += `, img)`;
         sql2 += `, ?)`;
         sql += sql2;
-        console.log(params, sql)
         pool.query(sql, params, (err, result) => {
           if (err) throw err;
           if (result.affectedRows > 0) {
@@ -439,10 +470,8 @@ server.post('/edit', (req, res) => {
       let filename = `${uuidv4()}.${extension}`;
       file.mv(`./public/img/article/${ filename }`, (err) => {
         if (err) throw err;
-        console.log('圖片上傳成功');
         params.splice(3, 0, filename);
         sql += `, img = ? WHERE aid = ?`
-        console.log(params, sql)
         pool.query(sql, params, (err, result) => {
           if (err) throw err;
           if (result.affectedRows > 0) {
@@ -469,7 +498,6 @@ server.post('/edit', (req, res) => {
 // 刪除文章
 server.get('/delete', (req, res) => {
   let aid = req.query.aid;
-  console.log(aid)
   let sql = `UPDATE article SET status = -1 WHERE aid = ?`
   pool.query(sql, [aid], (err, result) => {
     if (err) throw err;
@@ -538,8 +566,7 @@ server.get('/gainLikeNum', (req, res) => {
 // 指定閱覽文章
 server.get('/read', (req, res) => {
   let aid = req.query.aid;
-  console.log(aid);
-  let sql = `SELECT a.*, b.commentid, b.uid AS cmtuid, b.cmtuname, b.cmtavatar, b.content AS cmtcontent, b.parentcmtid, b.ctime AS cmttime FROM article AS a LEFT JOIN (SELECT a.*, b.uname AS cmtuname, b.avatar AS cmtavatar FROM comments AS a LEFT JOIN user AS b ON a.uid = b.uid) AS b ON a.aid = b.aid WHERE a.aid = ?;`
+  let sql = `SELECT a.*, b.commentid, b.uid AS cmtuid, b.cmtuname, b.cmtavatar,b.permission, b.content AS cmtcontent, b.parentcmtid, b.ctime AS cmttime FROM article AS a LEFT JOIN (SELECT a.*, b.uname AS cmtuname, b.avatar AS cmtavatar, b.permission FROM comments AS a LEFT JOIN user AS b ON a.uid = b.uid) AS b ON a.aid = b.aid WHERE a.aid = ?;`
   pool.query(sql, [aid], (err, result) => {
     if (err) throw err;
     if (result.length == 0) {
@@ -552,13 +579,11 @@ server.get('/read', (req, res) => {
 
 // 文章瀏覽次數查詢
 server.get('/viewTime', (req,res) => {
-  console.log('查詢瀏覽次數!!')
   let aid = req.query.aid;
   let sql = `SELECT COUNT(uid) FROM viewCount WHERE aid = ?`
   pool.query(sql, [aid], (err, result) => {
     if (err) throw err;
     else {
-      console.log(result);
       res.send(result)
     }
   })
@@ -648,7 +673,6 @@ server.get('/likeArticle', (req, res) => {
     return;
   }
   let aid = req.query.aid;
-  console.log(aid)
   let sql = `INSERT INTO likeArticle (uid, aid) VALUES (?, ?)`
   pool.query(sql, [ uid, aid ], (err, result) => {
     if (err) throw err;
@@ -682,7 +706,6 @@ server.get('/cancelLikeArticle', (req, res) => {
 // 查詢文章是否被收藏
 server.get('/queryLikeArticle', (req, res) => {
   let uid = req.session.uid;
-  console.log(uid)
   let aid = req.query.aid;
   let sql = `SELECT * FROM likeArticle WHERE uid = ? AND aid = ?`
   pool.query(sql, [uid, aid], (err, result) => {

@@ -27,7 +27,7 @@
       <div id="wangeditor" class=""></div>
     </div>
 
-    <button class="btn btn-lg btn-primary mt-2"  @click="postArticle">發布文章</button>
+    <button class="btn btn-lg btn-primary mt-2"  @click="postArticle" :disabled="submitDisable">發布文章</button>
   </div>
 </template>
 <script>
@@ -41,6 +41,7 @@
         category: -1,
         content: '',
         filename:'',
+        submitDisable: true
       }
     },
     components: {
@@ -48,6 +49,15 @@
     },
     mounted() {
       this.loadMore();
+    },
+    watch: {
+    },
+    updated() {
+      if (this.category !== -1 && this.content !== null && this.title !== '') {
+        this.submitDisable = false;
+      } else {
+        this.submitDisable = true;
+      }
     },
     methods: {
       loadMore() {
@@ -71,7 +81,7 @@
                 // editor.config.height = 500
                 editor.create()
                 editor.config.onchange = (text) => {
-                  console.log(text);
+                  // console.log(text);
                   this.content = text;
                 }
               }
@@ -101,7 +111,6 @@
           },
         }).then((res) => {
           let code = res.data.code;
-          console.log(code);
           if (code == 0) {
             this.$router.push('/signin');
           }else if (code == 1) {

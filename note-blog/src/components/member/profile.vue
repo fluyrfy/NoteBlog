@@ -37,7 +37,7 @@
             <a :class="tab2" href="#/profile/editProfile" @click="changeMiddle">修改資料</a>
           </li>
           <li class="nav-item">
-            <a :class="tab3" href="#/profile/profilePhoto" @click="changeRight">新增頭像</a>
+            <a :class="tab3" href="#/profile/profilePhoto" @click="changeRight" v-if="$store.getters.getPermission !== 6">修改頭像</a>
           </li>
         </ul>
         <div class="container">
@@ -402,7 +402,6 @@
         let url = 'queryUser'
         this.axios.get(url).then((res) => {
           let code = res.data.code;
-          console.log(res)
           if (code == -1) {
             this.$router.push('/signin')
             return;
@@ -410,11 +409,13 @@
             console.log('查詢錯誤')
           }else {
             this.userInfo = res.data[0];
-            console.log(this.userInfo)
             this.$store.commit("updateUid", this.userInfo.uid)
             if (this.userInfo.avatar == null) {
               this.src = "./img/defaultUser.png"
-            } else {
+            }else if (this.userInfo.permission == 6) {
+              this.src = this.userInfo.avatar;
+            }
+            else {
               this.src = `http://127.0.0.1:520/img/avatar/${this.userInfo.avatar}`
             }
             // 查詢po文數
@@ -422,14 +423,12 @@
               let code = res.data.code;
               if (code == 1) {
                 this.post = res.data.data.length;
-                console.log('個人po文',this.post);
               }
             })
             // 查詢獲讚數
             this.axios.get('gainLikeNum').then((res) => {
               let code = res.data.code;
               if (code == 1) {
-                console.log('發送查詢獲讚數請求')
                 this.gainLikeNum = res.data.data;
               }
             })

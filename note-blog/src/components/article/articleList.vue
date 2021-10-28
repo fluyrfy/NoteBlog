@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <div v-if="this.articleInfo.length == 0 " class="text-center mt-5 border font-weight-bold">No Article</div>
+    <div v-if="this.articleInfo.length == 0 " class="text-center mt-5 font-weight-bold "><h1><span class="badge badge-pill badge-dark">暫無文章</span></h1></div>
     <div v-else-if="isAlive == true" class="d-flex flex-column">
       <select class="form-select my-2 align-self-end fa-font-awesome" aria-label="Default select example" v-model="sort" style="max-width: 150px;">
         <option value="0" selected disabled>--文章排序--</option>
@@ -85,7 +85,6 @@
     },
     mounted() {
      this.loadMore();
-     console.log('現在uid', this.$store.getters.getUid);
      this.$store.commit('updateListActive', false);
     },
     destroyed() {
@@ -95,21 +94,16 @@
     },
     watch: {
       '$store.state.topic':  function () {
-        console.log('監聽到變動', this.$store.getters.getTopic)
         let topic = this.$store.getters.getTopic;
         this.loadMore(topic);
       },
       '$store.state.uid':  function () {
-        console.log('監聽到uid變動', this.$store.getters.getUid)
         this.loadMore();
       },
       '$store.state.searchWords':  function () {
-        console.log('監聽到搜尋關鍵字變動', this.$store.getters.getSearchWords)
         this.searchWords = this.$store.getters.getSearchWords;
-        console.log('現在關鍵字', this.searchWords)
       },
       sort (val) {
-        console.log('現在排序方式', val)
         if (val == 2) {
           this.articleInfo.sort((a, b) => {
             return b.viewcount - a.viewcount;
@@ -119,7 +113,6 @@
               return b.aid - a.aid;
             })
         }
-        console.log(this.articleInfo)
       }
     },
     computed: {
@@ -134,13 +127,11 @@
     },
     methods: {
       onChangePage(pageOfItems) {
-        console.log(pageOfItems)
         // this.reloadList();
         this.pageOfItems = pageOfItems;
       },
       loadMore(topic) {
         if(this.$store.getters.getUid == 0){
-          console.log('現在topic', this.$store.getters.getTopic)
           if (topic == null) {
             topic = this.$store.getters.getTopic;
           }
@@ -155,7 +146,6 @@
               this.articleInfo = res.data.data.sort(function (a, b) {
                 return b.aid -  a.aid;
               });
-              console.log(this.articleInfo)
             }
           });
         }else {
@@ -175,7 +165,6 @@
             this.articleInfo = res.data.data.sort(function (a, b) {
               return b.aid - a.aid;
             });
-            console.log(this.articleInfo)
           }
         })
       },

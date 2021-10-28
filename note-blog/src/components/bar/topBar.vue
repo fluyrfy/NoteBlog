@@ -2,9 +2,9 @@
   <div>
     <nav class="navbar navbar-expand-lg navbar-light bg-secondary rounded-top">
       <div class="container d-flex flex-nowrap" id="top-left">
-        <a class="navbar-brand" href="#/">部落格</a>
+        <a class="navbar-brand" href="#/" id="blog">部落格</a>
         <div class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="搜尋關鍵字" aria-label="Search" v-model='searchWords' :disabled="$store.getters.getListActive">
+          <input class="form-control me-2" type="search" placeholder="搜尋關鍵字" aria-label="Search" v-model='searchWords' v-if="$store.getters.getListActive !== true">
           <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
         </div>
         <button class="navbar-toggler " type="button" data-toggle="collapse" data-target="#navbarSupported" aria-controls="navbarSupportedContent" aria-expanded="true" aria-label="Toggle navigation">
@@ -25,7 +25,7 @@
               <li><routerLink class="dropdown-item" to="/signin" >登入</routerLink></li>
               <li><routerLink class="dropdown-item" to="/signup" >註冊</routerLink></li>
             </template>
-            <template v-if="$store.getters.getPermission !== 0">
+            <template v-if="$store.getters.getPermission == 1">
               <li><routerLink class="dropdown-item" to="/category">主題管理</routerLink></li>
             </template>
             <template v-if="$store.getters.getsUid !== 0">
@@ -75,19 +75,18 @@
           if (code == 0) {
             this.$store.commit('updatesUid', 0);
           } else if (code == 1) {
-            console.log('身分驗證', res.data.session)
             this.$store.commit('updatesUid', res.data.session)
           }
         })
       },
       signout() {
         let url = 'signout';
-        console.log('做刪除動作')
         this.axios.get(url).then(() => {
           this.$store.commit('updatesUid', 0);
           this.$store.commit('updatePermission', 0);
-        })
 
+        })
+        sessionStorage.clear();
         this.$router.push('/index');
       }
     },
@@ -104,5 +103,18 @@
   }
   svg {
     margin-right: 20px;
+  }
+
+  #blog {
+    width: 80px;
+    border-right: .05em solid;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 6s steps(4), caret 1s steps(1);
+    animation-iteration-count: infinite;
+  }
+  @keyframes typing { from { width: 0; } to {width: 100}}
+  @keyframes caret {
+    50% { border-color: transparent; }
   }
 </style>

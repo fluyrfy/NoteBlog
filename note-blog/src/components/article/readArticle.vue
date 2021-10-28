@@ -55,7 +55,7 @@
                           <div v-for="(item1, index1) of aInfo" :key="index1">
                             <div v-if="item1.parentcmtid == 0" class="d-flex mb-4 row" >
                               <!-- Parent comment-->
-                              <div class="flex-shrink-0 col-lg-1 ms-3"><img width="50px" height="50px" class="rounded-circle" :src="item1.cmtavatar ? avatar+item1.cmtavatar : './img/defaultUser.png'" alt="..." /></div>
+                              <div class="flex-shrink-0 col-lg-1 ms-3"><img width="50px" height="50px" class="rounded-circle" :src="item1.permission == 6 ? item1.cmtavatar : item1.cmtavatar ? avatar+item1.cmtavatar : './img/defaultUser.png'" alt="..." /></div>
                               <div class=" col-lg-10 " >
                                   <div class="fw-bold">{{item1.cmtuname}}</div>
                                   <div class="d-flex justify-content-lg-between">{{item1.cmtcontent}}<a @click="showCommentTextArea(item1.commentid)" href="javascript:void(0)" class="text-muted ">回覆</a></div>
@@ -63,7 +63,7 @@
                                   <!-- Child comment 1-->
                                   <div v-for="(item2, index2) of aInfo" :key="index2">
                                     <div v-if="item2.parentcmtid == item1.commentid" class="d-flex mt-4" >
-                                      <div class="flex-shrink-0"><img width="50px" height="50px" class="rounded-circle" :src="item2.cmtavatar ? avatar+item2.cmtavatar : './img/defaultUser.png'" alt="..." /></div>
+                                      <div class="flex-shrink-0"><img width="50px" height="50px" class="rounded-circle" :src="item2.permission == 6 ? item2.cmtavatar : item2.cmtavatar ? avatar+item2.cmtavatar : './img/defaultUser.png'" alt="..." /></div>
                                       <div class="ms-3">
                                           <div class="fw-bold">{{item2.cmtuname}}</div>
                                           {{item2.cmtcontent}}
@@ -136,11 +136,11 @@
     },
     methods: {
       loadMore() {
+        // console.log(this.$store.getters.getPermission)
         let aid = this.aid;
         let obj = { aid: aid };
         let url = 'read';
         this.axios.get(url, { params: obj } ).then((res) => {
-          console.log(res);
           this.aInfo = res.data.data.sort((a, b) => {
             return b.commentid - a.commentid;
           });
@@ -152,7 +152,6 @@
           this.cid = this.aInfo[0].cid;
           this.src = this.articleImg + this.img;
           this.$store.commit("updateTopic", this.cid);
-          console.log('點進文章topic', this.$store.getters.getTopic);
           this.viewCount();
           let url = 'category';
           let obj = { cid: this.cid };
@@ -165,7 +164,6 @@
           let url2 = 'queryLikeArticle'
           let obj2 = { aid }
           this.axios.get(url2, { params: obj2 } ).then(res => {
-            console.log(res)
             let code = res.data.code;
             if (code == 1) {
               this.thumbsActive = 1;
@@ -181,8 +179,7 @@
         let aid = this.aid;
         let obj = { aid: aid };
         let url = 'viewCount';
-        this.axios.get(url, { params: obj } ).then((res) => {
-          console.log(res)
+        this.axios.get(url, { params: obj } ).then(() => {
         })
       },
       addComment() {
@@ -204,7 +201,6 @@
         let obj = { aid: this.aid, childComment: this.childComment, parentcmtid: commentid };
         let url = 'addChildComment'
         this.axios.post(url, obj).then(res => {
-          console.log(res);
           let code = res.data.code;
           if (code == 1) {
             this.reloadComment();
@@ -220,7 +216,6 @@
         })
       },
       keyWord() {
-        console.log('現在cid',this.cid)
         this.$store.commit('updateTopic', this.cid);
       },
       likeArticle() {
@@ -245,7 +240,6 @@
             this.thumbsActive = 2;
             let url = 'cancelLikeArticle';
             this.axios.get(url, { params: obj } ).then(res => {
-              console.log(res)
               let code = res.data.code;
               if (code == 1) {
                 this.thumbsActive = 1;
@@ -279,7 +273,6 @@
         } else if (this.show !== 0){
           this.show = 0;
         }
-        console.log(this.show)
       }
     },
   }
