@@ -7,6 +7,7 @@ const mysql=require("mysql");
 const qs = require('querystring');
 // const request = require('request'); npm官方已禁用= =
 const axios = require('axios');
+const path = require('path')
 
 // uuid
 const { v4: uuidv4 } = require('uuid');
@@ -69,7 +70,7 @@ server.listen(520);
       // http://127.0.0.1:5050
   // 每請求是否驗證
   server.use(cors({
-    origin:["http://127.0.0.1:703","http://localhost:703"],//跨域處理
+    // origin:["http://127.0.0.1:703","http://localhost:703"],//跨域處理
     credentials:true //是否驗證
   }))
 
@@ -82,7 +83,7 @@ server.use(session({
 
 // 配置靜態目錄
 // http://127.0.0.1:8080/01.jpg
-server.use(express.static("public"));
+server.use(express.static('public'));
 
 // 使用內建bodyparser(註冊body-parser用法被淘汰)
 // server.use(express.urlencoded({ extended: false }));

@@ -1,6 +1,9 @@
 {
   "scripts": {
-    "serve": "nodemon app.js"
+    "dev": "node build/dev-server.js",
+    "build": "node build/build.js",
+    "server": "nodemon app.js",
+    "start": "node app.js"
   },
   "dependencies": {
     "axios": "^0.22.0",
