@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
+  <div class="container mt-lg-5 mt-sm-2">
     <div class="text-center">
       <div class="form-signin">
-        <img class="mb-4" src="bootstrap-solid.svg" alt="" width="72" height="72">
+        <img class="mb-4" src="../../../public/img/program.jpg" alt="" width="150" height="150">
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
         <div class="alert alert-danger alert-dismissable text-center" v-if="showAlert">
           <button type="button" class="close" data-dismiss="alert"
@@ -15,11 +15,11 @@
         <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" v-model="email">
         <label for="inputPassword" class="sr-only">Password</label>
         <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" v-model="upwd">
-        <div class="text-right"><routerLink to="" id="a1" class="text-decoration-underline ">忘記密碼?</routerLink></div>
+        <!-- <div class="text-right"><routerLink to="" id="a1" class="text-decoration-underline ">忘記密碼?</routerLink></div> -->
         <button class="btn btn-lg btn-primary btn-block mt-2 mb-2" type="submit" @click.prevent="signin">Sign in</button>
         <a @click="googleSignIn" href="#"><img src="../../../public/img/btn_google_signin_light_focus_web.png" alt="" class="rounded"></a>
         <div id="divspan"><span>還沒有帳號嗎?<router-link to="/signup" class="text-decoration-underline">註冊</router-link></span></div>
-        <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
+        <p class="mt-5 mb-3 text-muted">© 2021 FrankLiao</p>
       </div>
     </div>
   </div>
@@ -47,8 +47,9 @@
         appId: "1:915726178166:web:721a7dfa9c499222c14c57",
         measurementId: "G-GESSWKRTEC"
       };
-      firebase.initializeApp(firebaseConfig);
-
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
     },
     methods: {
       signin() {

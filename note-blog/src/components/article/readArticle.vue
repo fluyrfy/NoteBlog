@@ -204,6 +204,8 @@
           let code = res.data.code;
           if (code == 1) {
             this.reloadComment();
+          } else if (code == 0) {
+            this.$router.push('/signin');
           }
         })
         this.show = 0;

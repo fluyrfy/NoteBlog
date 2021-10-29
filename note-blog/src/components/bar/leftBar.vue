@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="d-flex flex-column flex-shrink-0 p-3 mr-0 bg-light" >
-      <a href="#/" class="d-flex mb-3 mb-md-0 link-dark text-decoration-none">
+      <a href="#/" class=" mb-2 link-dark text-decoration-none text-center fs-4 fw-bolder">
         <!-- <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg> -->
-        <div class="fs-4 align-items-center">主題</div>
+        主題
       </a>
       <hr class="mt-0">
       <router-link to="/">

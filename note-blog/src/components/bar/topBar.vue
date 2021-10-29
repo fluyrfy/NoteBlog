@@ -2,7 +2,7 @@
   <div>
     <nav class="navbar navbar-expand-lg navbar-light bg-secondary rounded-top">
       <div class="container d-flex flex-nowrap" id="top-left">
-        <a class="navbar-brand" href="#/" id="blog">部落格</a>
+        <a class="navbar-brand fw-bold" href="#/" id="blog">部落格</a>
         <div class="d-flex">
           <input class="form-control me-2" type="search" placeholder="搜尋關鍵字" aria-label="Search" v-model='searchWords' v-if="$store.getters.getListActive !== true">
           <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
@@ -106,14 +106,14 @@
   }
 
   #blog {
-    width: 80px;
-    border-right: .05em solid;
+    width: 88px;
+    border-right: .15em solid;
     overflow: hidden;
     white-space: nowrap;
     animation: typing 6s steps(4), caret 1s steps(1);
     animation-iteration-count: infinite;
   }
-  @keyframes typing { from { width: 0; } to {width: 100}}
+  @keyframes typing { from { width: 0; } to {width: 120}}
   @keyframes caret {
     50% { border-color: transparent; }
   }

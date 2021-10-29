@@ -1,9 +1,9 @@
 <template>
-  <div class="container">
+  <div class="container mt-lg-5">
     <div class="text-center">
       <div class="form-signin">
         <ValidationObserver v-slot="{ invalid }">
-        <img class="mb-4" src="bootstrap-solid.svg" alt="" width="72" height="72">
+        <img class="mb-4" src="../../../public/img/program.jpg" alt="" width="150px" height="150px">
         <h1 class="h3 mb-3 font-weight-normal">Please sign up</h1>
         <label for="inputEmail" class="sr-only" >uname</label>
         <ValidationProvider role="required" v-slot="{ errors }"><input type="text" id="inputUname" class="form-control" placeholder="用戶名" required="" autofocus="" v-model="uname" name="uname"><span class="badge badge-danger mb-1">{{ errors[0] }}</span></ValidationProvider>
@@ -24,7 +24,7 @@
         <button :class="btnClass"  @click="recaptcha" :disabled="invalid">Sign up</button>
         </ValidationObserver>
         <div id="divspan"><span>已經是會員了嗎?<router-link to="/signin" class="text-decoration-underline">登入</router-link></span></div>
-        <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
+        <p class="mt-5 mb-3 text-muted">© 2021 FrankLiao</p>
       </div>
     </div>
   </div>

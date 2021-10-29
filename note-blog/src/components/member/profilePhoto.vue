@@ -4,9 +4,10 @@
       <div class="text-center">
         <img :src="dataURL" class="avatar img-circle mt-5 mb-3 rounded-circle" alt="avatar">
         <p>{{filename}}</p>
-        <img-cutter @cutDown="cutDown" :cutWidth="100" :cutHeight="100" :sizeChange="false" class="mt-4"></img-cutter>
+        <img-cutter @cutDown="cutDown" :cutWidth="100" :cutHeight="100" :sizeChange="false" class="mt-4" :boxWidth="300"
+        :boxHeight="300"></img-cutter>
       </div>
-      <div class="text-center mt-3">
+      <div class="text-center mt-3 mb-1">
         <button type="" class="btn btn-outline-success" :disabled="disabled" @click="avatar">確定送出</button>
       </div>
     </div>

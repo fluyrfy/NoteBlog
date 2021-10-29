@@ -1,7 +1,6 @@
 <template>
   <div>
-
-    <div class="container bootstrap snippets bootdey mt-2">
+    <div class="bootstrap snippets bootdey mt-2">
     <div class=" ">
         <!-- edit form column -->
           <!-- <div class="alert alert-info alert-dismissable">
@@ -10,7 +9,7 @@
             This is an <strong>.alert</strong>. Use this to show important messages to the user.
           </div> -->
           <!-- <h3>Personal info</h3> -->
-          <div class="row justify-content-lg-around form-group" role="form" data-toggle="validator" ref="formValid">
+          <div class="row justify-content-lg-around justify-content-sm-between form-group" role="form" data-toggle="validator" ref="formValid">
             <div class="alert alert-danger alert-dismissable text-center" v-if="showAlert">
               <!-- <button type="button" class="close" data-dismiss="alert"
                   aria-hidden="true">
@@ -46,13 +45,13 @@
               </div>
             </div>
           </template>
-            <div class="">
-              <label class="col-lg-3 control-label">個人簡介:</label>
+            <div class="row">
+              <label class="col-lg-2 control-label">個人簡介:</label>
               <div class="col-lg-8">
                 <textarea class="form-control" type="text" v-model="selfIntro" placeholder="留下你的自我介紹"></textarea>
               </div>
             </div>
-            <button type="" @click="updateUser" class="btn btn-primary mt-2 w-25" :disabled="disable">修改</button>
+            <button type="" @click="updateUser" class="btn btn-primary mt-2  w-25 " :disabled="disable">修改</button>
           </div>
     </div>
     <hr>

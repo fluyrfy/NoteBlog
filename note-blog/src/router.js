@@ -19,6 +19,9 @@ import Editprofile from './components/member/editProfile.vue'
 import Profilephoto from './components/member/profilePhoto.vue'
 // import Ctrlarticle from './components/member/ctrlArticle.vue'
 
+// 其他類
+import NotFound from './components/pages/404NotFound.vue'
+
 // 管理類
 import Category from './components/admin/category.vue'
 
@@ -52,6 +55,6 @@ export default new Router({
         },
       ] },
       { path: '/category', component: Category },
-      // { path: '/editprofile', component: Editprofile },
+      { path: '*', component: NotFound }
     ]
 })
