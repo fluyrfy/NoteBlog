@@ -40,8 +40,7 @@ build/Release
 
 # Dependency directories
 node_modules/
-node_modules
-/node_modules
+server/node_modules
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -123,4 +122,4 @@ build/
 .DS_Store
 todo.md
 
-SA
+SA/
