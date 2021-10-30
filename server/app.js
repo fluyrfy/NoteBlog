@@ -1,6 +1,7 @@
 // 引入express, cors, session, mysql
 const express = require('express');
-const session=require("express-session");
+// const session=require("express-session");
+const session = require('express-session');
 const cors=require("cors");
 const mysql=require("mysql");
 // const bodyParser = require('body-parser');
@@ -51,26 +52,27 @@ const fileupload = require('express-fileupload');
 
 // 創建數據庫連接池
 const pool=mysql.createPool({
-  host:"127.0.0.1",
-  user:"root",
-  password:"",
+  host:"us-cdbr-east-04.cleardb.com",
+  user:"b76431e9e629bb",
+  password:"1cc0de66",
   port:3306,
   connectionLimit:20,
-  database:"note_blog",
+  database:"heroku_ee0beaa9e487e46",
   charset: 'utf8mb4_general_ci'
 })
 
 // 創建web服務器
+const PORT = process.env.PORT || 520;
 const server = express();
 // 監聽端口8080
-server.listen(520);
+server.listen(PORT);
 
 // 跨域處理 cors
   // 配置允許訪問程序地址(腳手架)
       // http://127.0.0.1:5050
   // 每請求是否驗證
   server.use(cors({
-    // origin:["http://127.0.0.1:703","http://localhost:703"],//跨域處理
+    origin:["http://127.0.0.1:703","http://localhost:703","https://www.noteblog.site"],//跨域處理
     credentials:true //是否驗證
   }))
 

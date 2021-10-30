@@ -12,9 +12,9 @@
           <i class="fas fa-exclamation-circle"></i>&nbsp;帳號或密碼錯誤
         </div>
         <label for="inputEmail" class="sr-only" >Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="" autofocus="" v-model="email">
+        <input type="email" id="inputEmail" class="form-control" placeholder="電子郵件" required="" autofocus="" v-model="email">
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required="" v-model="upwd">
+        <input type="password" id="inputPassword" class="form-control" placeholder="密碼" required="" v-model="upwd">
         <!-- <div class="text-right"><routerLink to="" id="a1" class="text-decoration-underline ">忘記密碼?</routerLink></div> -->
         <button class="btn btn-lg btn-primary btn-block mt-2 mb-2" type="submit" @click.prevent="signin">Sign in</button>
         <a @click="googleSignIn" href="#"><img src="../../../public/img/btn_google_signin_light_focus_web.png" alt="" class="rounded"></a>
@@ -68,7 +68,7 @@
             sessionStorage.setItem("uid", uid)
             sessionStorage.setItem('permission', permission);
             this.$router.push('/');
-          } else {
+          } else if (code == -1){
             this.showAlert = true;
             return;
           }

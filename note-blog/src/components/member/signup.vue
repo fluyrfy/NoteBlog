@@ -78,9 +78,7 @@
       },
       // google 機器人驗證 recaptcha v.3 for vue 2.
       recaptcha() {
-        console.log("recaptcha clicked");
           this.$recaptchaLoaded().then(() => {
-            console.log("recaptcha loaded");
             this.$recaptcha("signup").then((token) => {
               // console.log({token}); // Will print the token
               let u = this.uname;

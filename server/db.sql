@@ -3,6 +3,8 @@
 -- 資料庫
 CREATE DATABASE note_blog;
 
+use note_blog;
+
 -- 用戶表
 CREATE TABLE user(
   uid INT PRIMARY KEY  NOT NULL AUTO_INCREMENT,

@@ -14,7 +14,8 @@ import axios from 'axios'
 //配置請求時保存session信息
 axios.defaults.withCredentials=true;
 //配置請求基礎路徑
-axios.defaults.baseURL="http://127.0.0.1:520/" //測試時地址欄不可輸入http://localhost:8080
+// axios.defaults.baseURL="https://note-blog073.herokuapp.com/" //測試時地址欄不可輸入http://localhost:8080
+axios.defaults.baseURL="https://www.noteblog.site/"
 // 在vue中註冊axios
 // Vue.use(aios) axios不支持這種寫法
 //註冊到原型
@@ -83,9 +84,9 @@ let store = new Vuex.Store({
 })
 
 
-Vue.prototype.avatar = "http://127.0.0.1:520/img/avatar/";
+Vue.prototype.avatar = "https://www.noteblog.site/img/avatar/";
 // Vue.prototype.avatar = avatar;
-Vue.prototype.articleImg = "http://127.0.0.1:520/img/article/";
+Vue.prototype.articleImg = "https://www.noteblog.site/img/article/";
 
 new Vue({
   router,
