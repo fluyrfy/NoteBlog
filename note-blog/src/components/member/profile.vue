@@ -416,7 +416,7 @@
               this.src = this.userInfo.avatar;
             }
             else {
-              this.src = `http://127.0.0.1:520/img/avatar/${this.userInfo.avatar}`
+              this.src = this.avatar + this.userInfo.avatar;
             }
             // 查詢po文數
             this.axios.get('listUser').then((res) => {
