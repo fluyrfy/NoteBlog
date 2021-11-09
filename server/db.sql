@@ -1,3 +1,11 @@
+-- 使用 Sequelize & Sequelize-cli 套件添加表, 欄位型別語法:http://sequelize.org/master/manual/model-basics.html#strings
+-- 指令：
+--   0.初始化config與預設資料夾: npx sequelize-cli init
+--   1.新增、創建表遷移檔: npx sequelize migration:generate --name 表名稱, Ex: npx sequelize migration:generate --name user
+--   2.執行遷移: npx sequelize db:migrate
+--   3.撤銷最後一次遷移: npx sequelize db:migrate:undo
+
+
 -- #db.sql 創建表添加數據
 
 -- 資料庫

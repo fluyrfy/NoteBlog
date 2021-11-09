@@ -77,6 +77,7 @@ server.use(
       "http://127.0.0.1:703",
       "http://localhost:703",
       "https://www.noteblog.site",
+      "http://127.0.0.1:520",
     ], //跨域處理
     credentials: true, //是否驗證
   })
@@ -102,6 +103,11 @@ server.use(express.static(path.resolve(__dirname, "public")));
 // express 檔案上傳套件
 server.use(fileupload());
 
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3({
+  accessKeyId: "AKIAYLYQDWHPULVKSQPL",
+  secretAccessKey: "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",
+});
 //------------------------------------------------------用戶相關------------------------------------------------------
 // 用戶註冊
 server.post("/signup", (req, res) => {
@@ -367,8 +373,25 @@ server.post("/avatar", (req, res) => {
     let extension = getFileExtension(file.name);
     if (extension !== undefined) {
       let filename = `${uuidv4()}.${extension}`;
-      file.mv(`./public/img/avatar/${filename}`, (err) => {
-        if (err) throw err;
+      // file.mv(`./public/img/avatar/${filename}`, (err) => {
+      //   if (err) throw err;
+      // });
+      // const params = {
+      //   Bucket: "noteblog", // 相簿位子
+      //   Key: filename, // 你希望儲存在 S3 上的檔案名稱
+      //   Body: file, // 檔案
+      // };
+      const params = {
+        Bucket: "noteblog/avatar", // 相簿位子
+        Key: filename, // 你希望儲存在 S3 上的檔案名稱
+        Body: file.data, // 檔案
+        ContentType: file.mimetype,
+        ACL: "public-read", // 檔案權限
+      };
+
+      s3.upload(params, function (err, data) {
+        if (err) console.log(err, err.stack);
+        else console.log("Bucket Created Successfully", data.Location);
       });
       let sql = `UPDATE user SET avatar = ? WHERE uid = ?`;
       pool.query(sql, [filename, uid], (err, result) => {
@@ -426,21 +449,33 @@ server.post("/write", (req, res) => {
     let extension = getFileExtension(file.name);
     if (extension !== undefined) {
       let filename = `${uuidv4()}.${extension}`;
-      file.mv(`./public/img/article/${filename}`, (err) => {
-        if (err) throw err;
-        params.splice(4, 0, filename);
-        sql += `, img)`;
-        sql2 += `, ?)`;
-        sql += sql2;
-        pool.query(sql, params, (err, result) => {
-          if (err) throw err;
-          if (result.affectedRows > 0) {
-            res.send({ code: 1, msg: "文章新增成功" });
-          } else {
-            res.send({ code: -1, msg: "文章新增失敗" });
-          }
-        });
+      // file.mv(`./public/img/article/${filename}`, (err) => {
+      // if (err) throw err;
+      const s3params = {
+        Bucket: "noteblog/article", // 相簿位子
+        Key: filename, // 你希望儲存在 S3 上的檔案名稱
+        Body: file.data, // 檔案
+        ContentType: file.mimetype,
+        ACL: "public-read", // 檔案權限
+      };
+
+      s3.upload(s3params, function (err, data) {
+        if (err) console.log(err, err.stack);
+        else console.log("Bucket Created Successfully", data.Location);
       });
+      params.splice(4, 0, filename);
+      sql += `, img)`;
+      sql2 += `, ?)`;
+      sql += sql2;
+      pool.query(sql, params, (err, result) => {
+        if (err) throw err;
+        if (result.affectedRows > 0) {
+          res.send({ code: 1, msg: "文章新增成功" });
+        } else {
+          res.send({ code: -1, msg: "文章新增失敗" });
+        }
+      });
+      // });
     }
   } else {
     sql += `)`;
@@ -479,19 +514,30 @@ server.post("/edit", (req, res) => {
     let extension = getFileExtension(file.name);
     if (extension !== undefined) {
       let filename = `${uuidv4()}.${extension}`;
-      file.mv(`./public/img/article/${filename}`, (err) => {
-        if (err) throw err;
-        params.splice(3, 0, filename);
-        sql += `, img = ? WHERE aid = ?`;
-        pool.query(sql, params, (err, result) => {
-          if (err) throw err;
-          if (result.affectedRows > 0) {
-            res.send({ code: 1, msg: "文章修改成功" });
-          } else {
-            res.send({ code: -1, msg: "文章修改失敗" });
-          }
-        });
+      // file.mv(`./public/img/article/${filename}`, (err) => {
+      // if (err) throw err;
+      const s3params = {
+        Bucket: "noteblog/article", // 相簿位子
+        Key: filename, // 你希望儲存在 S3 上的檔案名稱
+        Body: file.data, // 檔案
+        ContentType: file.mimetype,
+        ACL: "public-read", // 檔案權限
+      };
+      s3.upload(s3params, function (err, data) {
+        if (err) console.log(err, err.stack);
+        else console.log("Bucket Created Successfully", data.Location);
       });
+      params.splice(3, 0, filename);
+      sql += `, img = ? WHERE aid = ?`;
+      pool.query(sql, params, (err, result) => {
+        if (err) throw err;
+        if (result.affectedRows > 0) {
+          res.send({ code: 1, msg: "文章修改成功" });
+        } else {
+          res.send({ code: -1, msg: "文章修改失敗" });
+        }
+      });
+      // });
     }
   } else {
     sql += ` WHERE aid = ?`;
