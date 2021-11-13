@@ -2,7 +2,8 @@
   "scripts": {
     "build": "cd ./note-blog && npm install &&  npm run build",
     "dev": "nodemon app.js",
-    "start": "npm install && npm run build && cd ./server && node app.js"
+    "serve": "cd ./server && node app.js",
+    "start": "npm install && npm run build && npm run serve"
   },
   "dependencies": {
     "aws-sdk": "^2.1023.0",
