@@ -62,7 +62,7 @@ const pool = mysql.createPool({
 });
 
 // 創建web服務器
-const PORT = process.env.PORT || 520;
+const PORT = process.env.PORT;
 const server = express();
 // 監聽端口8080
 server.listen(PORT);
