@@ -8,36 +8,43 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable("comments", {
-      commentid: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-        allowNull: false,
+    await queryInterface.createTable(
+      "comments",
+      {
+        commentid: {
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+          allowNull: false,
+        },
+        uid: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        aid: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        content: {
+          type: Sequelize.TEXT,
+          allowNull: false,
+        },
+        parentcmtid: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
+        ctime: {
+          type: "TIMESTAMP",
+          defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+          allowNull: false,
+        },
       },
-      uid: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      aid: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      content: {
-        type: Sequelize.TEXT,
-        allowNull: false,
-      },
-      parentcmtid: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
-      ctime: {
-        type: "TIMESTAMP",
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-        allowNull: false,
-      },
-    });
+      {
+        charset: "utf8mb4",
+        collate: "utf8mb4_general_ci",
+      }
+    );
   },
 
   down: async (queryInterface, Sequelize) => {

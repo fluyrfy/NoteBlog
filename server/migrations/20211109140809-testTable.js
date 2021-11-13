@@ -8,9 +8,16 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable("testTable", {
-      tname: Sequelize.STRING(50),
-    });
+    await queryInterface.createTable(
+      "testTable",
+      {
+        tname: Sequelize.STRING(50),
+      },
+      {
+        charset: "utf8mb4",
+        collate: "utf8mb4_general_ci",
+      }
+    );
   },
 
   down: async (queryInterface, Sequelize) => {

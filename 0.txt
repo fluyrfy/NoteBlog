@@ -1,0 +1,20 @@
+1.
+
+Data agnostic migrations
+https://www.npmjs.com/package/migrations
+https://greddyblogs.gitlab.io/2020/05/22/nodejs2/#gsc.tab=0
+https://dwatow.github.io/2018/09-24-sequelize/sequelize-migration/
+
+
+2. S3 儲存研究
+
+3. 成發投影片製作
+
+打包 程式 / SQL / 套件
+
+
+
+
+
+
+

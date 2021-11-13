@@ -49,8 +49,8 @@ CREATE TABLE viewCount(
 -- 留言表
 CREATE TABLE comments(
   commentid INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  uid INT,
-  aid INT,
+  uid INT NOT NULL,
+  aid INT NOT NULL,
   content TEXT NOT NULL,
   parentcmtid INT NOT NULL DEFAULT 0,
   ctime TIMESTAMP NOT NULL DEFAULT current_timestamp

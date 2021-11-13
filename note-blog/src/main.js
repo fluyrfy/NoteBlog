@@ -14,7 +14,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 //配置請求基礎路徑
 // axios.defaults.baseURL="https://note-blog073.herokuapp.com/" //測試時地址欄不可輸入http://localhost:8080
-axios.defaults.baseURL = "https://www.noteblog.site/";
+axios.defaults.baseURL = "https://www.noteblog.site";
 // 在vue中註冊axios
 // Vue.use(aios) axios不支持這種寫法
 //註冊到原型
