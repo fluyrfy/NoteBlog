@@ -2,7 +2,7 @@
   "name": "server",
   "main": "app.js",
   "scripts": {
-    "build": "cd note-blog && npm install &&  npm run build",
+    "build": "cd note-blog &&  npm run build",
     "dev": "nodemon app.js",
     "start": "cd server && node app.js"
   },
