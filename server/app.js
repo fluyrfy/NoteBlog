@@ -94,7 +94,7 @@ server.use(
 
 // 配置靜態目錄
 // http://127.0.0.1:8080/01.jpg
-server.use(express.static(path.resolve(__dirname, "../note-blog/dist")));
+server.use(express.static(path.resolve(__dirname, "../note-blog/public")));
 
 // 使用內建bodyparser(註冊body-parser用法被淘汰)
 // server.use(express.urlencoded({ extended: false }));
