@@ -26,6 +26,8 @@
     "@ocrv/vue-tailwind-pagination": "^0.0.4",
     "@vue/cli": "^4.5.15",
     "@vue/cli-service": "^4.5.14",
+    "@vue/cli-plugin-babel": "^4.5.14",
+    "@vue/cli-plugin-eslint": "^4.5.14",
     "axios": "^0.24.0",
     "bootstrap": "^5.1.3",
     "bootstrap-icons": "^1.6.1",
