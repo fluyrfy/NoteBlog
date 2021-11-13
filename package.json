@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "cd ./note-blog && npm run build",
+    "build": "cd ./note-blog && npm install &&  npm run build",
     "dev": "nodemon app.js",
     "start": "npm run build && cd ./server && node app.js"
   },
