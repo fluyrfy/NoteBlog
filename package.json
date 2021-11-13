@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "cd ./server && node app.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1023.0",
