@@ -10,8 +10,8 @@ const qs = require("querystring");
 const axios = require("axios");
 const path = require("path");
 
-// 各種金鑰、密碼設定檔
-const key = require("./keyConfig/keyConfig.js");
+// // 各種金鑰、密碼設定檔
+// const key = require("./keyConfig/keyConfig.js");
 
 // uuid
 const { v4: uuidv4 } = require("uuid");
@@ -57,7 +57,7 @@ const fileupload = require("express-fileupload");
 const pool = mysql.createPool({
   host: "us-cdbr-east-04.cleardb.com",
   user: "b76431e9e629bb",
-  password: key.dbPassword,
+  password: process.env.DB_PASSWORD,
   port: 3306,
   connectionLimit: 20,
   database: "heroku_ee0beaa9e487e46",
@@ -108,8 +108,8 @@ server.use(fileupload());
 
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3({
-  accessKeyId: key.s3AccessKeyId,
-  secretAccessKey: key.s3SecretAccessKey,
+  accessKeyId: process.env.S3_KEY,
+  secretAccessKey: process.env.S3_SECRET,
 });
 //------------------------------------------------------用戶相關------------------------------------------------------
 // 用戶註冊
@@ -121,7 +121,7 @@ server.post("/signup", (req, res) => {
     var token = data.token;
 
     //密鑰
-    const secretKey = key.recaptchaSecretKey;
+    const secretKey = process.env.RECAPTCHA_SECRET;
 
     // Verify URL
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`;
